@@ -1,0 +1,46 @@
+#pragma once
+
+#include "BaseFeature.h"
+#include "Feature.h"
+
+#include <utility>
+#include <vector>
+using namespace std;
+
+/*
+ * Klasa koja definira kaskadu i specificira neke operacije nad njom
+ *
+ * @author: Ivan Kusalic
+ */
+class Cascade
+{
+public:
+	Cascade(void);
+	~Cascade(void);
+
+	/*
+	 * sama kaskada
+	 *
+	 * vanjski vektor predstavlja nivo kaskade
+	 * unutarnji vektor sadrzi featurove pojedinog nivoa
+	 * feature pojedinog nivoa je predstavljen ako pair u kojem float tezina featurea, a Feature sam opis featurea
+	 */
+	vector<vector<pair<float,Feature> > > cascade;
+
+	vector<int> levelThreshold;  // thresholdi za pojedine levele kaskade
+
+	/*
+	 * snima kaskadu u file
+	 *
+	 * ujedno snima i sve osnovne feature u isti file na pocetak
+	 * tako da je moguce pozvati BaseFeature.loadBaseFeatures() nad istim fileom
+	 */
+	void saveCascade(string file);
+
+	/*
+	 * loada kaskadu iz filea
+	 *
+	 * usput loada i osnovne featureove
+	 */
+	void loadCascade(string file);
+};
