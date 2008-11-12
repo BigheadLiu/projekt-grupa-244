@@ -60,10 +60,10 @@ void testImageDio() {
 	Image slika("c:\\Images\\true\\A01_A01_0000.bmp");		
 	string tmp = slika.imageData();
 	cout << tmp << endl;
-	//slika.showImage();
+	slika.showImage();
 
-	slika.showImageOverlappedWithFeature( f, 0, 0, 1. );
-	cout << "Suma je: " << slika.evaluateBaseFeature( f, 0, 0, 1 );
+	//slika.showImageOverlappedWithFeature( f, 0, 0, 1. );
+	//cout << "Suma je: " << slika.evaluateBaseFeature( f, 0, 0, 1 );
 
 	system("pause");
 }
@@ -78,8 +78,8 @@ void testLoadVise() {
 int _tmain(int argc, _TCHAR* argv[])
 {
 	//testFeatureDio();
-	//testImageDio();
-	testLoadVise();
+	testImageDio();
+	//testLoadVise();
 
 
 	return 0;

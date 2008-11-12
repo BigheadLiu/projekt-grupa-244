@@ -32,7 +32,7 @@ public:
 	void showImage();
 	void showImageOverlappedWithFeature(const BaseFeature &f, int x, int y, float scale);
 	static vector<Image> Image::loadAllImagesFromDirectory(string directory);
-	vector < Rectangle > findSingns();
+	vector < Rectangle > findSigns();
 	string imageData();
 	int getHeight();
 	int getWidth();
