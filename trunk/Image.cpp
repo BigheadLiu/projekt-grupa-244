@@ -22,6 +22,8 @@ Image::Image(string fileName)
 {	
 	//TODO: u kasnijim verzijama prepravit na BGR umjesto grayscale-a
 	image = cvLoadImage( fileName.c_str() );		
+
+	if (image == NULL) cout << "Nisam uspio ucitati sliku";
 	IntegralImage =(int *) malloc( sizeof(int) * image->height * image->width );
 	int *stupac = (int *) malloc( sizeof(int) * image->height * image->width );
 	char *data = image->imageData;
@@ -53,7 +55,7 @@ Image::Image(string fileName)
 
 Image::~Image(void)
 {
-	cvReleaseImage( &image );
+	if( image != NULL) cvReleaseImage( &image );
 	free(IntegralImage);
 }
 
@@ -156,18 +158,23 @@ void Image::nacrtajTocke( IplImage *slika, vector < pair<int,int> > tocke, float
 }
 
 //TODO: funkcija trenutno ne radi kako treba
-vector<Image> Image::loadAllImagesFromDirectory(string directory) {
-	vector < Image > rjesenje;
-	vector < string > files;	
+vector<Image*> Image::loadAllImagesFromDirectory(string dir) {
+	string file = dir + "\\files.txt";
+	vector < Image* > rjesenje;
+	char ime[100];
 
-	SearchDirectory( files, directory, "bmp", false);
-	for(int i=0; i<files.size(); i++)
-		cout << files[i] << endl;
+	FILE *fin = fopen(file.c_str(), "r");
+	while( fscanf(fin, "%s", ime) == 1) {
+		string tmp = dir + "\\" + string( ime );
+		
+		rjesenje.push_back( new Image( tmp ) );
+	}
+	fclose(fin);
 
 	return rjesenje;
 }
 
-int Image::SearchDirectory(std::vector<std::string> &refvecFiles,
+int Image::SearchDirectory(LPCWSTR dir, std::vector<std::string> &refvecFiles,
                     const std::string        &refcstrRootDirectory,
                     const std::string        &refcstrExtension,
                     bool                     bSearchSubdirectories)
@@ -180,8 +187,10 @@ int Image::SearchDirectory(std::vector<std::string> &refvecFiles,
 
 
   strPattern = refcstrRootDirectory + "\\*.*";
-
-  hFile = ::FindFirstFile( (LPCWSTR)strPattern.c_str(), &FileInformation);
+  wchar_t* text = new wchar_t[100];
+  MultiByteToWideChar(CP_ACP, NULL, strPattern.c_str(), -1, text, strPattern.size() );
+  
+  hFile = FindFirstFile( (LPCWSTR)dir, &FileInformation);  
   if(hFile != INVALID_HANDLE_VALUE)
   {
     do
@@ -193,26 +202,19 @@ int Image::SearchDirectory(std::vector<std::string> &refvecFiles,
 
         if(FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         {
-          if(bSearchSubdirectories)
-          {
-            // Search subdirectory
-            int iRC = SearchDirectory(refvecFiles,
-                                      strFilePath,
-                                      refcstrExtension,
-                                      bSearchSubdirectories);
-            if(iRC)
-              return iRC;
-          }
         }
         else
-        {
+        {		  
+		  
           // Check extension
           strExtension = (char *)FileInformation.cFileName;
           strExtension = strExtension.substr(strExtension.rfind(".") + 1);
 
+		  cout << strFilePath << endl;
           if(strExtension == refcstrExtension)
           {
             // Save filename
+
             refvecFiles.push_back(strFilePath);
           }
         }

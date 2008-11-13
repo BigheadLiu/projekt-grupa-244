@@ -2,9 +2,8 @@
 //
 
 #include "stdafx.h"
-
+#include "AdaBoost.h"
 #include "Cascade.h"
-
 #include "Image.h"
 #include <cstdio>
 #include <cstdlib>
@@ -69,18 +68,29 @@ void testImageDio() {
 }
 
 void testLoadVise() {	
-	vector< Image > slike = Image::loadAllImagesFromDirectory("c:\\Images\\true\\" );
-	//slike[0].showImage();
+	vector< Image* > slike = Image::loadAllImagesFromDirectory( "c:\\Images\\true" );	
+	slike[0]->showImage();
 	cvWaitKey(0);
 	system("pause");
+}
+
+void testAdaBoost() {
+	vector< Image* > slikeTrue = Image::loadAllImagesFromDirectory( "c:\\Images\\true" );	
+	vector< Image* > slikeFalse= Image::loadAllImagesFromDirectory( "c:\\Images\\false" );	
+	BaseFeature::loadBaseFeatures("bftest.txt");
+
+	AdaBoost boost;
+	boost.startTraining( slikeTrue, slikeFalse, BaseFeature::allBaseFeatures, 10);	
+	
 }
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	//testFeatureDio();
-	testImageDio();
+	//testImageDio();
 	//testLoadVise();
-
+	testAdaBoost();
+	system("pause");
 
 	return 0;
 }
