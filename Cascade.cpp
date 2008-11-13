@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "Cascade.h"
 
-#include <utility>
 #include <vector>
 using namespace std;
 
@@ -19,7 +18,7 @@ void Cascade::saveCascade(string file)
 	
 	// snimnje osnovnih featureove:
 	
-	vector<BaseFeature> &bf=BaseFeature::allBaseFeatures;
+	vector<Feature> &bf=Feature::allBaseFeatures;
 	
 	fprintf(out,"%d\n",bf.size());
 	
@@ -28,11 +27,11 @@ void Cascade::saveCascade(string file)
 
 		fprintf(out,"%d\n",n=bf[i].add.size());
 		for(j=0;j<n;j++)
-			fprintf(out,"%d %d\n",bf[i].add[j].first,bf[i].add[j].second);
+			fprintf(out,"%d %d\n",bf[i].add[j],bf[i].add[j]);
 
 		fprintf(out,"%d\n",n=bf[i].subtract.size());
 		for(j=0;j<n;j++)
-			fprintf(out,"%d %d\n",bf[i].subtract[j].first,bf[i].subtract[j].second);
+			fprintf(out,"%d %d\n",bf[i].subtract[j],bf[i].subtract[j]);
 	}
 	
 
@@ -45,9 +44,16 @@ void Cascade::saveCascade(string file)
 		fprintf(out,"%d\n",cascade[i].size());
 		
 		for(j=0;j<cascade[i].size();j++){
-			fprintf(out,"%f\n",cascade[i][j].first);
-			fprintf(out,"%d %d %d %f\n",cascade[i][j].second.baseRb,cascade[i][j].second.x,
-				cascade[i][j].second.y,cascade[i][j].second.scale);
+			fprintf(out,"%d %d %d %d ",cascade[i][j].width,cascade[i][j].height,cascade[i][j].x,cascade[i][j].y);
+			fprintf(out,"%f %f\n",cascade[i][j].scale,cascade[i][j].weight);
+
+			fprintf(out,"%d\n",cascade[i][j].add.size());
+			for(int tn=cascade[i][j].add.size(),k=0;k<tn;k++)
+				fprintf(out,"%d %d\n",cascade[i][j].add[k],cascade[i][j].add[k]);
+
+			fprintf(out,"%d\n",cascade[i][j].subtract.size());
+			for(int tn=cascade[i][j].subtract.size(),k=0;k<tn;k++)
+				fprintf(out,"%d %d\n",cascade[i][j].subtract[k],cascade[i][j].subtract[k]);
 		}
 	}
 	fprintf(out,"%d\n",levelThreshold.size());
@@ -63,7 +69,7 @@ void Cascade::loadCascade(string file) {
 	
 	// ucitava osnovne featureove:
 	
-	vector<BaseFeature> &bf=BaseFeature::allBaseFeatures;
+	vector<Feature> &bf=Feature::allBaseFeatures;
 
 	bf.clear();
 	
@@ -87,7 +93,7 @@ void Cascade::loadCascade(string file) {
 			od.push_back(make_pair(a,b));
 		}
 
-		bf.push_back(BaseFeature(w,h,zb,od));
+		bf.push_back(Feature(w,h,zb,od,-1,-1,-1,-1));
 	}
 
 
@@ -100,14 +106,23 @@ void Cascade::loadCascade(string file) {
 
 	cascade.resize(n);
 
-	for(int j,i=0;i<n;i++) {
+	for(int tn,j,i=0;i<n;i++) {
 		fscanf(in,"%d",&m);
 		
 		cascade[i].resize(m);
 		for(j=0;j<m;j++){
-			fscanf(in,"%f",&(cascade[i][j].first));
-			fscanf(in,"%d %d %d %f",&(cascade[i][j].second.baseRb),&(cascade[i][j].second.x),
-				&(cascade[i][j].second.y),&(cascade[i][j].second.scale));
+			fscanf(in,"%d %d %d %d",&(cascade[i][j].width),&(cascade[i][j].height),&(cascade[i][j].x),&(cascade[i][j].y));
+			fscanf(in,"%f %f",&(cascade[i][j].scale),&(cascade[i][j].weight));
+
+			fscanf(in,"%d",&tn);
+			cascade[i][j].add.resize(tn);
+			for(int k=0;k<tn;k++)
+				fscanf(in,"%d %d",&(cascade[i][j].add[k]),&(cascade[i][j].add[k]));
+
+			fscanf(in,"%d",&tn);
+			cascade[i][j].subtract.resize(tn);
+			for(int k=0;k<tn;k++)
+				fscanf(in,"%d %d",&(cascade[i][j].subtract[k]),&(cascade[i][j].subtract[k]));
 		}
 	}
 

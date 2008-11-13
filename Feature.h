@@ -1,7 +1,6 @@
 #pragma once
 
-#include "BaseFeature.h"
-
+#include <utility>
 #include <vector>
 using namespace std;
 
@@ -16,13 +15,23 @@ public:
 	Feature(void);
 	~Feature(void);
 
-	Feature(int tBase, int tX, int tY, float tScale);  // konstruktor za inicijalizaciju
-	
-	int baseRb;  // index BaseFeaturea na kojem se temelji ovaj Feature u vektoru allBaseFeatures;
+	// konstruktor za inicijalizaciju:
+	Feature(int w,int h,vector<pair<int,int> > zb,vector<pair<int,int> > od, int tX, int tY, float tScale, float tWeight);
+
+	int width;  // osnovna sirina
+	int height;  // osnovna visina
+
+	vector<pair<int,int> > add;  // koje (relativne) kordinate treba zbrojiti (iz integralne slike)
+	vector<pair<int,int> > subtract;  // koje (relativne) kordinate treba oduzeti (iz integralne slike)
+
 	int x;  // x kordinata lijevog ruba
 	int y;  // y kordinata gornjeg ruba
-	float scale;  // scale factor naspram BaseFeature
-		
+
+	float scale;  // scale factor naspram osnovne velicine featurea
+	float weight;  // tezinska vrijednost ovog featurea u kaskadi
+
+	static vector<Feature> allBaseFeatures;  // skup svih osnovnih featureova
+
 	/*
 	 * generira sve featureove za zadani prozor
 	 *
@@ -33,4 +42,7 @@ public:
 	 * veci feature se pomice za isti iznos koliko i feature osnovne velicine
 	 */
 	static vector<Feature> generateAll(int x,int y, int width, int height, int step, float scaleFactor);
+
+	static void loadBaseFeatures(string file);  // dohvaca osnovne featureove iz filea
+
 };

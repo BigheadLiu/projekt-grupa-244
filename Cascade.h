@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BaseFeature.h"
 #include "Feature.h"
 
 #include <utility>
@@ -23,9 +22,8 @@ public:
 	 *
 	 * vanjski vektor predstavlja nivo kaskade
 	 * unutarnji vektor sadrzi featurove pojedinog nivoa
-	 * feature pojedinog nivoa je predstavljen ako pair u kojem float tezina featurea, a Feature sam opis featurea
 	 */
-	vector<vector<pair<float,Feature> > > cascade;
+	vector<vector<Feature> > cascade;
 
 	vector<int> levelThreshold;  // thresholdi za pojedine levele kaskade
 
