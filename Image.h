@@ -28,9 +28,9 @@ public:
 	Image(string);
 	~Image(void);
 
-	int evaluateBaseFeature(const BaseFeature &F, int x, int y, float scale);
+	int evaluateBaseFeature(const Feature &F);
 	void showImage();
-	void showImageOverlappedWithFeature(const BaseFeature &f, int x, int y, float scale);
+	void showImageOverlappedWithFeature(const Feature &f);
 	static vector<Image*> Image::loadAllImagesFromDirectory(string directory);
 	vector < Rectangle > findSigns();
 	string imageData();
