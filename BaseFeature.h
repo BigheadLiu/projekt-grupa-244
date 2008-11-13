@@ -16,8 +16,7 @@ public:
 	~BaseFeature(void);
 
 	BaseFeature(int w,int h,vector<pair<int,int> > zb,vector<pair<int,int> > od);  // konstruktor za inicijalizaciju
-
-	float weight;
+	
 	int width;  // osnovna sirina
 	int height;  // osnovna visina
 	int rb;  // redni broj ovog BaseFeaturea

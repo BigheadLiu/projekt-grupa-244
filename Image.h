@@ -13,7 +13,7 @@ private:
 	void nacrtajTocke( IplImage *slika, vector< pair<int,int> > tocke, float scale, int x, int y );
 	static string convertWCharArrayToString(const WCHAR * const wcharArray);
 	int *IntegralImage;
-	static int SearchDirectory(std::vector<std::string> &refvecFiles,
+	static int SearchDirectory(LPCWSTR dir, std::vector<std::string> &refvecFiles,
                     const std::string        &refcstrRootDirectory,
                     const std::string        &refcstrExtension,
                     bool                     bSearchSubdirectories = true);
@@ -31,7 +31,7 @@ public:
 	int evaluateBaseFeature(const BaseFeature &F, int x, int y, float scale);
 	void showImage();
 	void showImageOverlappedWithFeature(const BaseFeature &f, int x, int y, float scale);
-	static vector<Image> Image::loadAllImagesFromDirectory(string directory);
+	static vector<Image*> Image::loadAllImagesFromDirectory(string directory);
 	vector < Rectangle > findSigns();
 	string imageData();
 	int getHeight();

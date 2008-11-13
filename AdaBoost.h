@@ -1,5 +1,14 @@
 #pragma once
 
+#include "StdAfx.h"
+#include <algorithm>
+#include "BaseFeature.h"
+#include "Feature.h"
+#include "Image.h"
+#include <vector>
+#include "AdaBoost.h"
+using namespace std;
+
 class AdaBoost
 {
 private:
@@ -18,9 +27,10 @@ private:
 
 	static pair<float, float> sumFeatureValue( vector< triple > & featureValue);
 	static void normalizeWeights( vector< float > &weightPositive, vector<float> &weightNegative);
+	static float sumWeight( vector< float > weight);
 public:
 	AdaBoost(void);
 	~AdaBoost(void);
 
-	static vector<BaseFeature> startTraining(vector<Image>&positive, vector<Image>&negative, vector< BaseFeature > &features, int T);
+	static vector<BaseFeature> startTraining(vector<Image*>&positive, vector<Image*>&negative, vector< BaseFeature > &features, int T);
 };
