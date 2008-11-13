@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include <iostream>
 #include <algorithm>
-#include "BaseFeature.h"
 #include "Feature.h"
 #include "Image.h"
 #include <vector>
@@ -32,13 +31,12 @@ AdaBoost::~AdaBoost(void)
 
 void ispisi(vector <float> ispis) {
 	for(int i=0; i<ispis.size(); i++) cout << ispis[i] << " ";
-	cout << endl;
-	system("pause");
+	cout << endl;	
 }
 
-vector<BaseFeature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&negative, vector< BaseFeature > &features, int T) {
+vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&negative, vector< Feature > &features, int T) {
 	vector< float > weightPositive, weightNegative;
-	vector <BaseFeature> rjesenje;
+	vector <Feature> rjesenje;
 
 	debug("ZAPOCINJE ADABOOST TRAINING" );
 
@@ -56,14 +54,14 @@ vector<BaseFeature> AdaBoost::startTraining(vector<Image*>&positive, vector<Imag
 	for(int i=0; i<features.size(); i++) {
 		vector<  triple > tmp;
 		for(int j=0; j<positive.size(); j++)  {
-//			int val = positive[j]->evaluateBaseFeature( features[i] );
-			int val = (rand() % 100)* 20 + 1000;			
+			int val = positive[j]->evaluateBaseFeature( features[i] );
+//			int val = (rand() % 100)* 20 + 1000;			
 			tmp.push_back( triple(j, val, true) );
 		}
 
 		for(int j=0; j<negative.size(); j++) {
-//			int val = negative[j]->evaluateBaseFeature( features[i] );
-			int val = (rand() % 100) * 20;
+			int val = negative[j]->evaluateBaseFeature( features[i] );
+//			int val = (rand() % 100) * 20;
 			tmp.push_back( triple(j, val, false) );
 		}
 
@@ -83,7 +81,7 @@ vector<BaseFeature> AdaBoost::startTraining(vector<Image*>&positive, vector<Imag
 		for(int j=0; j<features.size(); j++) {
 			//odredi <T+, T->
 			pair< float, float > total = make_pair( sumWeight( weightPositive ), sumWeight( weightNegative ));
-			ispisi( weightPositive );
+			//ispisi( weightPositive );
 			pair< float, float > curr(0., 0. );
 
 			for(int k=0; k<featureValue[j].size(); k++) {
@@ -134,9 +132,9 @@ vector<BaseFeature> AdaBoost::startTraining(vector<Image*>&positive, vector<Imag
 		}
 
 		
-		rjesenje.push_back( features[bestFeature] );
-		//rjesenje.back().treshold = treshold
-		//rjesenje.back().weight = alpha;		
+		rjesenje.push_back( features[bestFeature] );		
+		rjesenje.back().treshold = treshold;	
+		rjesenje.back().weight = alpha;		
 	}
 
 	return rjesenje;

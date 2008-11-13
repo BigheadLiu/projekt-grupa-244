@@ -2,7 +2,7 @@
 #include <sstream>
 #include <windows.h>
 #include <vector>
-#include "BaseFeature.h"
+#include "Feature.h"
 #include <algorithm>
 #include "Image.h"
 #include <string>
@@ -94,7 +94,11 @@ void Image::showImage(void) {
 	cvDestroyWindow("PRIKAZ SLIKA");
 }
 
-void Image::showImageOverlappedWithFeature(const BaseFeature &f, int x, int y, float scale) {
+void Image::showImageOverlappedWithFeature(const Feature &f) {
+	int x = f.x;
+	int y = f.y;
+	float scale = f.scale;
+
 	const int minVelicina = 500;
 	cvNamedWindow("PRIKAZ SLIKA", CV_WINDOW_AUTOSIZE);
 	
@@ -116,8 +120,11 @@ void Image::showImageOverlappedWithFeature(const BaseFeature &f, int x, int y, f
 	cvDestroyWindow("PRIKAZ SLIKA");
 }
 
-int Image::evaluateBaseFeature(const BaseFeature &F, int x, int y, float scale) {	
+int Image::evaluateBaseFeature(const Feature &F) {	
 	int rj = 0;
+	int x = F.x;
+	int y = F.y;
+	float scale = F.scale;
 		
 	for(int i=0; i<F.add.size(); i++) {
 		int a = (int)((x + F.add[i].first) * scale);

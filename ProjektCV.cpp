@@ -10,6 +10,7 @@
 #include <iostream>
 using namespace std;
 
+/*
 void testFeatureDio()
 {
 	BaseFeature::loadBaseFeatures("bftest.txt");
@@ -52,8 +53,10 @@ void testFeatureDio()
 	system("pause");
 }
 
+*/
 void testImageDio() {
 	BaseFeature::loadBaseFeatures("bftest.txt");
+	
 	BaseFeature f = BaseFeature::allBaseFeatures[0];
 
 	Image slika("c:\\Images\\true\\A01_A01_0000.bmp");		
@@ -77,10 +80,10 @@ void testLoadVise() {
 void testAdaBoost() {
 	vector< Image* > slikeTrue = Image::loadAllImagesFromDirectory( "c:\\Images\\true" );	
 	vector< Image* > slikeFalse= Image::loadAllImagesFromDirectory( "c:\\Images\\false" );	
-	BaseFeature::loadBaseFeatures("bftest.txt");
+	Feature::loadBaseFeatures("bftest.txt");
 
 	AdaBoost boost;
-	boost.startTraining( slikeTrue, slikeFalse, BaseFeature::allBaseFeatures, 10);	
+	boost.startTraining( slikeTrue, slikeFalse, Feature::allBaseFeatures, 20);	
 	
 }
 
