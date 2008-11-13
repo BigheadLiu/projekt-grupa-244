@@ -32,5 +32,5 @@ public:
 	AdaBoost(void);
 	~AdaBoost(void);
 
-	static vector<BaseFeature> startTraining(vector<Image*>&positive, vector<Image*>&negative, vector< BaseFeature > &features, int T);
+	static vector<Feature> startTraining(vector<Image*>&positive, vector<Image*>&negative, vector< Feature > &features, int T);
 };

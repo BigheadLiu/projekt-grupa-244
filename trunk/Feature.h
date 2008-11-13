@@ -29,6 +29,7 @@ public:
 
 	float scale;  // scale factor naspram osnovne velicine featurea
 	float weight;  // tezinska vrijednost ovog featurea u kaskadi
+	int treshold; // treshold koji izracunava adaBoost za taj Feature
 
 	static vector<Feature> allBaseFeatures;  // skup svih osnovnih featureova
 
