@@ -13,11 +13,11 @@ public:
 // TODO: da li da rade direktno s integralnim slikama ili nekakvim pointerima na njih (brze)
 // TODO: implementirati metodu adaBoostTrain()
 
-	vector<IntegralImage> positiveTrain;  // set (integralnih) slika za treniranje koje su pozitivne
-	vector<IntegralImage> negativeTrain;  // set (integralnih) slika za treniranje koje su negativne
+	vector<Image> positiveTrain;  // set (integralnih) slika za treniranje koje su pozitivne
+	vector<Image> negativeTrain;  // set (integralnih) slika za treniranje koje su negativne
 	
-	vector<IntegralImage> positiveTest;  // set (integralnih) slika za testiranje koje su pozitivne
-	vector<IntegralImage> negativeTest;  // set (integralnih) slika za testiranje koje su negativne
+	vector<Image> positiveTest;  // set (integralnih) slika za testiranje koje su pozitivne
+	vector<Image> negativeTest;  // set (integralnih) slika za testiranje koje su negativne
 	
 	ViolaJones(void)
 	{
@@ -28,7 +28,7 @@ public:
 	}
 	
 	// konstruktor za inicijalizaciju:	
-	ViolaJones(vector<IntegralImage> ptr, vector<IntegralImage>ntr, vector<IntegralImage>pte, vector<IntegralImage> nte);
+	ViolaJones(vector<Image> ptr, vector<Image>ntr, vector<Image>pte, vector<Image> nte);
 	
 	/*
 	 * f - the maximum acceptable false positive rate per layer
@@ -42,13 +42,13 @@ public:
 	pair<double,double evaluateOnTest(Cascade kaskada);
 	
 	// za zadanu integralnu sliku vraca da li je svrstana pozitivno ili negativno
-	bool evaluate(IntegralImage iim, Cascade kaskada);
+	bool evaluate(Image iim, Cascade kaskada);
 	
 	/*
 	 * evaluate the current cascaded detector on the set of non-face images
 	 * and put any false detections into the set N
 	 */
-	void evaluateOnTrainNegative(list<IntegralImage> &N, Cascade kaskada);
+	void evaluateOnTrainNegative(list<Image> &N, Cascade kaskada);
 	
 	/*
 	 * Decrease threshold for the ith classifier until the current cascaded classifier

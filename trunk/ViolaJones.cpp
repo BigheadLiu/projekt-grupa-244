@@ -9,7 +9,7 @@ ViolaJones::~ViolaJones(void)
 {
 }
 
-ViolaJones::ViolaJones(vector<IntegralImage> ptr, vector<IntegralImage>ntr, vector<IntegralImage>pte, vector<IntegralImage> nte)
+ViolaJones::ViolaJones(vector<Image> ptr, vector<Image>ntr, vector<Image>pte, vector<Image> nte)
 {
 	positiveTrain=ptr;
 	negativeTrain=ntr;
@@ -25,8 +25,8 @@ ViolaJones::ViolaJones(vector<IntegralImage> ptr, vector<IntegralImage>ntr, vect
  */
 void ViolaJones::buildCascade(double f,double d, double targetF, Cascade &kaskada) {
 	//P - set of positive examples; N - set of negative examples:
-	list<IntegralImage> P(positiveTrain.begin(),positiveTrain.end());
-	list<IntegralImage> N(negativeTrain.begin(),negativeTrain.end());
+	list<Image> P(positiveTrain.begin(),positiveTrain.end());
+	list<Image> N(negativeTrain.begin(),negativeTrain.end());
 	
 	double tmpF=1.0;  // trenutni false positive rate
 	double lastF=1.0;  // false positive rate prethodnog nivoa
@@ -45,8 +45,9 @@ void ViolaJones::buildCascade(double f,double d, double targetF, Cascade &kaskad
 		
 		while(tmpF>f*lastF) {
 			n++;
-			
-			adaBoostTrain(P,N,n,kaskada);  // trenira level kaskade s n featureova
+
+			//adaBoostTrain(P,N,n,kaskada);  // trenira level kaskade s n featureova
+			AdaBoost::startTraining(P,N,kaskada[i],n)
 			
 			// Evaluate current cascaded classifier on validation set to determine tmpF and tmpD:
 			tmpRet=evaluateOnTest(kaskada);
@@ -85,19 +86,22 @@ pair<double,double ViolaJones::evaluateOnTest(Cascade kaskada) {
 }
 
 // za zadanu integralnu sliku vraca da li je svrstana pozitivno ili negativno
-bool ViolaJones::evaluate(IntegralImage iim, Cascade kaskada) {
+bool ViolaJones::evaluate(Image iim, Cascade kaskada) {
 	double sum=0;
 	for(int k,j,i=0;i<kaskada.cascade.size();i++) {
 		sum=0;  // suma trenutno obradivanog nivoa kaskade
 		
+		
 		for(j=0;j<kaskada.cascade[i].size();j++) {
-			for(k=0;k<kaskada.cascade[i][j].add.size();k++)
-				sum+=kaskada.cascade[i][j].weight*
-					iim.get(kaskada.cascade[i][j].add[k].first,kaskada.cascade[i][j].add[k].second);
+			sum+=imm.evaluateBaseFeature(kaskada.cascade[i][j])*kaskada.cascade[i][j].weight;
+						
+//			for(k=0;k<kaskada.cascade[i][j].add.size();k++)
+//				sum+=kaskada.cascade[i][j].weight*
+//					iim.get(kaskada.cascade[i][j].add[k].first,kaskada.cascade[i][j].add[k].second);
 			
-			for(k=0;k<kaskada.cascade[i][j].subtract.size();k++)
-				sum-=kaskada.cascade[i][j].weight*
-					iim.get(kaskada.cascade[i][j].subtract[k].first,kaskada.cascade[i][j].subtract[k].second);
+//			for(k=0;k<kaskada.cascade[i][j].subtract.size();k++)
+//				sum-=kaskada.cascade[i][j].weight*
+//					iim.get(kaskada.cascade[i][j].subtract[k].first,kaskada.cascade[i][j].subtract[k].second);
 		}
 		
 		if(sum<kaskada.levelThreshold[i]) return false;  // nije proso i-ti level kaskade
@@ -110,7 +114,7 @@ bool ViolaJones::evaluate(IntegralImage iim, Cascade kaskada) {
  * evaluate the current cascaded detector on the set of non-face images
  * and put any false detections into the set N
  */
-void ViolaJones::evaluateOnTrainNegative(list<IntegralImage> &N, Cascade kaskada) {
+void ViolaJones::evaluateOnTrainNegative(list<Image> &N, Cascade kaskada) {
 	for(int i=0;i<negativeTrain.size();i++)
 		if(evaluate(negativeTrain[i],kaskada)) N.push_back(negativeTrain[i]);
 }
