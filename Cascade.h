@@ -25,7 +25,7 @@ public:
 	 */
 	vector<vector<Feature> > cascade;
 
-	vector<int> levelThreshold;  // thresholdi za pojedine levele kaskade
+	vector<double> levelThreshold;  // thresholdi za pojedine levele kaskade
 
 	/*
 	 * snima kaskadu u file
