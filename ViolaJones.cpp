@@ -45,7 +45,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 				
 		kaskada.cascade.push_back( vector<Feature>(0) ); // dodajem prazan vektor na kraj da napravim mjesto za sljedeci level kaskade
 		while(tmpF>f*lastF) {
-			n+=10;
+			n+=20;
 			cout << "broj featura: " << n << " false positive: " << tmpF << " " << "trazimo: " << targetF << endl;
 			//cout << n << endl;
 
@@ -66,10 +66,14 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 			
 			tmpF=tmpRet.first;
 			tmpD=tmpRet.second;					
+
+			debug(tmpF);
+			debug(tmpD);
 		}
 		
 		N.clear();
-		
+		lastD = tmpD;		
+		lastF = tmpF;
 		/*
 		 * If tempF > targetF then evaluate the current cascaded detector on the set of non-face images
 		 * and put any false detections into the set N:
@@ -83,7 +87,7 @@ pair<double,double> ViolaJones::evaluateOnTest(Cascade &kaskada) {
 	int errP=0, errN=0;  // broj gresaka na P i na N
 	
 	for(int i=0;i<positiveTest.size();i++)
-		if(evaluate(positiveTest[i],kaskada)) errP++;
+		if(!evaluate(positiveTest[i],kaskada)) errP++;
 	
 	for(int i=0;i<negativeTest.size();i++)
 		if(!evaluate(negativeTest[i],kaskada)) errN++;
@@ -138,10 +142,11 @@ void ViolaJones::decraseThreshold(int ith, double minD, Cascade &kaskada) {
 	
 	
 	// varijable za trazenje thersholda
-	double mid,up=kaskada.cascade[ith].size() * 10, down = -up;/////////////////////////////100100
+	double mid,up=kaskada.cascade[ith].size() * 10, down = 0;/////////////////////////////100100
 	// up je 10^5 sto je dovoljno za 250 20x20 featureova po levelu kaskade
 	// TODO: granicu up odabrati na pametniji nacin
 	
+	debug( ith ); debug( minD );
 	while(up - down > 1e-3) {
 		mid=kaskada.levelThreshold[ith]=(down+up)/2;		
 		
@@ -150,6 +155,7 @@ void ViolaJones::decraseThreshold(int ith, double minD, Cascade &kaskada) {
 			if(!evaluate(positiveTest[i],kaskada)) errP++;
 
 		//tmpD=errP/(double)negativeTest.size(); >??????????????????????? ili positiveTest
+		
 		tmpD=errP/(double)negativeTest.size(); 				
 
 		if(tmpD<minD+1e-9) up=mid;

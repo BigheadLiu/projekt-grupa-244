@@ -122,9 +122,7 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 		}
 		
 		//update the weights
-		cout << "Current error at this step: " << error << endl;		
-		debug2(treshold);
-		
+		cout << "Error: " << error << " | ";
 		float beta = error / (1 - error);	
 		if (beta > 1e6) beta = 1e6;
 		float alpha = log( 1 / beta );		
@@ -148,7 +146,7 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 		rjesenje.back().usporedba = p;
 
 	}
-	
+	cout << endl;
 	return rjesenje;
 }
 
