@@ -9,6 +9,9 @@ using namespace std;
  *
  * @author: Ivan Kusalic
  */
+
+#define NUM_CHANNELS 3
+
 class Feature
 {
 public:
@@ -16,7 +19,7 @@ public:
 	~Feature(void);
 
 	// konstruktor za inicijalizaciju:
-	Feature(int w,int h,vector<pair<int,int> > zb,vector<pair<int,int> > od, int tX, int tY, float tScale, float tWeight);
+	Feature(int w,int h,vector<pair<int,int> > zb,vector<pair<int,int> > od, int tX, int tY, float tScale, float tWeight, int channel);
 
 	int width;  // osnovna sirina
 	int height;  // osnovna visina
@@ -28,10 +31,13 @@ public:
 	int y;  // y kordinata gornjeg ruba
 
 	float scale;  // scale factor naspram osnovne velicine featurea
-	float weight;  // tezinska vrijednost ovog featurea u kaskadi
-	int treshold; // treshold koji izracunava adaBoost za taj Feature
+	float weight;  // tezinska vrijednost ovog featurea u kaskadi	
+	int usporedba; // vrijednost koja govori je li potrebno usporedivati val > trehold ili treshold > val, oznaka je p u clanku.
+	int treshold;  // treshold za taj feature
+	int channel; // kanal (odnosno boja) za koju se racuna taj feature
 
 	static vector<Feature> allBaseFeatures;  // skup svih osnovnih featureova
+	static vector<Feature> generatedFeatures; // skup svih generiranih feature-ova
 
 	/*
 	 * generira sve featureove za zadani prozor
@@ -42,8 +48,7 @@ public:
 	 *
 	 * veci feature se pomice za isti iznos koliko i feature osnovne velicine
 	 */
-	static vector<Feature> generateAll(int x,int y, int width, int height, int step, float scaleFactor);
+	static vector<Feature> generateAll(int width, int height, int step, float scaleFactor);
 
 	static void loadBaseFeatures(string file);  // dohvaca osnovne featureove iz filea
-
 };
