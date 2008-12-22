@@ -143,7 +143,7 @@ void testViolaJones() {
 
 	Cascade kaskada;
 	ViolaJones kuso( slikeTrue, slikeFalse, slikeTrue, slikeFalse );
-	kuso.buildCascade( 0.3, 0.99, 0.000001, kaskada );
+	kuso.buildCascade( 0.3, 0.95, 0.01, kaskada );
 
 	testirajKaskadu( kaskada );
 }
