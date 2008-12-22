@@ -16,24 +16,24 @@ using namespace std;
 #define data(i,j,k)			data[ (i) * step + (j) * NUM_CHANNELS + (k) ]
 #define INF INT_MAX / 2
 #define debug(x) cout << #x << ": " << x << endl;
-
+int NUM_CHANNELS;
 
 Image::Image(string fileName) 
 {	
-	//TODO: u kasnijim verzijama prepravit na BGR umjesto grayscale-a
 	image = cvLoadImage( fileName.c_str() );		
+
+	NUM_CHANNELS = image->nChannels;
 
 	if (image == NULL) cout << "Nisam uspio ucitati sliku";
 	IntegralImage =(int *) malloc( sizeof(int) * image->height * image->width * NUM_CHANNELS );
 	int *stupac = (int *) malloc( sizeof(int) * image->height * image->width * NUM_CHANNELS );
-	unsigned char *data = (unsigned char *) image->imageData;
+	unsigned char *data = (unsigned char *) image->imageData;	
 
 	int step = image->widthStep;
 	
 	for(int j=0; j<image->width; j++) 
 		for(int c=0; c<NUM_CHANNELS; c++) 
 			stupac(0,j,c) = data(0,j,c);
-
 
 	for(int i=1; i<image->height; i++)
 		for(int j=0; j<image->width; j++)
@@ -254,10 +254,7 @@ void Image::evaluirajLevel( vector< Feature > features ) {
 						cvWaitKey(0);
 
 						brTrue++;
-						//showImageOverlappedWithFeature( features[0], i,j , true);
 				} else {
-						//nacrtajOkvir( image, i , j, velicinaProzora, 255, 0, 0);
-						//cout  << "NE!!!" << i << " " << j << endl;
 						brFalse++;
 				}
 			}
@@ -304,17 +301,18 @@ void Image::nacrtajOkvir(IplImage *slika, int X, int Y, int velicina, int b, int
 
 }
 
-void Image::evaluateCascade(Cascade kaskada) {
-	cout << "EVALUIRAM KASKADU NA SLICI" << endl;
-	float trenScale = 1;
-	float stepScale = 1.25;
+void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale, float zavrsniScale) {
+
+	debug("EVALUIRAM KASKADU NA SLICI");
+
+	float trenScale = pocetniScale;
+	//float stepScale = 1.25;
 	int k;
 
 	IplImage* tmpImage = cvCreateImage( cvSize(image->width, image->height),image->depth, image->nChannels);		
 	cvCopyImage( image, tmpImage );
 
-	for(;trenScale<10; trenScale *= stepScale) {	
-	//{ trenScale = 1.55;
+	for(;trenScale<zavrsniScale; trenScale *= stepScale) {	
 		int velicinaSkoka = ( trenScale + 1 ) * 4;
 		int velicinaProzora = trenScale * 20;
 
@@ -327,7 +325,9 @@ void Image::evaluateCascade(Cascade kaskada) {
 				}
 
 				if ( k == kaskada.cascade.size() ) { //prosao je sve elemente kaskade, ovo je pronadeni znak
+#ifndef NODEBUG
 					cout << "NASAO!!!" << i << " " << j << " " << velicinaProzora << " " << velicinaSkoka << endl;
+#endif
 					brTrue ++;
                     nacrtajOkvir( image, i, j, velicinaProzora, 0, 0, 255 );
 		
@@ -336,7 +336,11 @@ void Image::evaluateCascade(Cascade kaskada) {
 				}
 			}
 		}
-		cout << "OD UKUPNO: " << brFalse + brTrue << " PROZORA, JA SAM ZA: " << brTrue << " rekao da su znakovi" << endl;
+
+#ifndef NODEBUG
+		cout << "OD UKUPNO: " << brFalse + brTrue << " PROZORA, JA SAM ZA: " << brTrue << " rekao da su znakovi. To je: " << (float)brTrue / (brFalse + brTrue) << " od ukupnog broja." << endl;
+#endif
+
 		showImage();
 		cvCopyImage( tmpImage, image );
 	}
@@ -350,8 +354,7 @@ bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, int scale, 
 		sum += evaluateTrainedFeature( kaskada.cascade[index][i], X, Y, false );
 		kaskada.cascade[index][i].scale /= scale;
 	}
-	//debug( sum );
-	//debug( kaskada.levelThreshold[index] );
+
 	if (sum > kaskada.levelThreshold[index]) return true;
 	else return false;
 }
