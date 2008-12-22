@@ -267,6 +267,14 @@
 			>
 		</Filter>
 		<File
+			RelativePath=".\bftest.txt"
+			>
+		</File>
+		<File
+			RelativePath=".\cascadeout.txt"
+			>
+		</File>
+		<File
 			RelativePath=".\ReadMe.txt"
 			>
 		</File>
