@@ -1,6 +1,5 @@
 #include "StdAfx.h"
-#include <sstream>
-#include <windows.h>
+#include "Cascade.h"
 #include <vector>
 #include "Feature.h"
 #include <algorithm>
@@ -9,48 +8,48 @@
 #include <cv.h>
 #include <iostream>
 #include <highgui.h>
-#include <sstream>
-#include <conio.h>
+#include <climits>
 using namespace std;
 
-#define stupac(x,y)		stupac[ (x) * image->width + (y) ]
-#define IntegralImage(x,y)	IntegralImage[ (x) * image->width + (y) ]
-#define data(i,j,k)			data[ i * step + j * channels + k ]
+#define stupac(x,y,c)		stupac[ ((x) * image->width + (y) ) * NUM_CHANNELS + (c)]
+#define IntegralImage(x,y,c)	IntegralImage[ ((x) * image->width + (y)) * NUM_CHANNELS + (c) ]
+#define data(i,j,k)			data[ (i) * step + (j) * NUM_CHANNELS + (k) ]
+#define INF INT_MAX / 2
+#define debug(x) cout << #x << ": " << x << endl;
 
 
-Image::Image(string fileName)
+Image::Image(string fileName) 
 {	
 	//TODO: u kasnijim verzijama prepravit na BGR umjesto grayscale-a
 	image = cvLoadImage( fileName.c_str() );		
 
 	if (image == NULL) cout << "Nisam uspio ucitati sliku";
-	IntegralImage =(int *) malloc( sizeof(int) * image->height * image->width );
-	int *stupac = (int *) malloc( sizeof(int) * image->height * image->width );
-	char *data = image->imageData;
-	int step = image->widthStep;
+	IntegralImage =(int *) malloc( sizeof(int) * image->height * image->width * NUM_CHANNELS );
+	int *stupac = (int *) malloc( sizeof(int) * image->height * image->width * NUM_CHANNELS );
+	unsigned char *data = (unsigned char *) image->imageData;
 
-	//integralnu sliku trenutno radim samo na Y komponenti(zbog toga sliku pretvaram u grayscale)
-	//u finalnoj verziji to treba izbaciti
-	IplImage* grayImage = cvCreateImage( cvSize(image->width, image->height),image->depth, 1);		
-	cvCvtColor( image, grayImage, CV_BGR2GRAY );
-	int channels = 1;
+	int step = image->widthStep;
 	
-	for(int j=0; j<image->width; j++)
-		stupac(0,j) = data(0,j,0);
+	for(int j=0; j<image->width; j++) 
+		for(int c=0; c<NUM_CHANNELS; c++) 
+			stupac(0,j,c) = data(0,j,c);
+
 
 	for(int i=1; i<image->height; i++)
 		for(int j=0; j<image->width; j++)
-			stupac(i,j) = stupac(i-1, j) + data(i,j,0);		
+			for(int c=0; c<NUM_CHANNELS; c++)
+				stupac(i,j,c) = stupac(i-1, j, c) + data(i,j,c);		
 
 	for(int i=0; i<image->height; i++)
-		IntegralImage(i,0) = stupac(i,0);
+		for(int c=0; c<NUM_CHANNELS; c++)
+			IntegralImage(i,0,c) = stupac(i,0,c);
 
 	for(int i=0; i<image->height; i++)
 		for(int j=1; j<image->width; j++)
-			IntegralImage(i,j) = IntegralImage(i, j-1) + stupac(i,j);
+			for(int c=0; c<NUM_CHANNELS; c++)
+				IntegralImage(i,j, c) = IntegralImage(i, j-1, c) + stupac(i,j, c);
 
-	free( stupac );
-	cvReleaseImage( &grayImage );
+	free( stupac );	
 }
 
 Image::~Image(void)
@@ -94,10 +93,10 @@ void Image::showImage(void) {
 	cvDestroyWindow("PRIKAZ SLIKA");
 }
 
-void Image::showImageOverlappedWithFeature(const Feature &f) {
-	int x = f.x;
-	int y = f.y;
+void Image::showImageOverlappedWithFeature(const Feature &f, int X, int Y, bool wait) {
 	float scale = f.scale;
+	int x = f.x * scale + X;
+	int y = f.y * scale + Y;
 
 	const int minVelicina = 500;
 	cvNamedWindow("PRIKAZ SLIKA", CV_WINDOW_AUTOSIZE);
@@ -112,31 +111,47 @@ void Image::showImageOverlappedWithFeature(const Feature &f) {
 	IplImage *tmpImage = cvCreateImage( cvSize(w,h), image->depth, image->nChannels );
 	cvResize( image, tmpImage );
 	
-	nacrtajTocke( tmpImage, f.add, scale * scaleSlike, x, y );
-	nacrtajTocke( tmpImage, f.subtract, scale * scaleSlike, x, y );
+	//debug( scale );
+	//debug( scaleSlike );
+	int pomX = (X + x * scale) * scaleSlike;
+	int pomY = (Y + y * scale) * scaleSlike;
+
+	nacrtajTocke( tmpImage, f.add, scale * scaleSlike, pomX, pomY );
+	nacrtajTocke( tmpImage, f.subtract, scale * scaleSlike, pomX, pomY );
 
 	cvShowImage( "PRIKAZ SLIKA", tmpImage );
-	cvWaitKey(0);
+	if (wait == true) cvWaitKey(0);
+
 	cvDestroyWindow("PRIKAZ SLIKA");
+	cvReleaseImage( &tmpImage );
 }
 
-int Image::evaluateBaseFeature(const Feature &F) {	
+float Image::evaluateTrainedFeature(const Feature &F, int X, int Y, bool ispisi) {	
+	int val = evaluateBaseFeature( F, X, Y, ispisi );
+	return  (F.usporedba * val < F.usporedba * F.treshold * F.scale) * F.weight;
+}
+
+int Image::evaluateBaseFeature(const Feature &F, int X, int Y, bool ispisi) {	
 	int rj = 0;
 	int x = F.x;
 	int y = F.y;
 	float scale = F.scale;
-		
+			
 	for(int i=0; i<F.add.size(); i++) {
-		int a = (int)((x + F.add[i].first) * scale);
-		int b = (int)((y + F.add[i].second) * scale);
-		rj += IntegralImage( a, b);
+		int a = (int)((x + F.add[i].first * scale) + X);
+		int b = (int)((y + F.add[i].second * scale) + Y);		
+
+		if (a >= getHeight() || b >= getWidth() ) return -INF;
+		rj += IntegralImage( a, b, F.channel);
 	}
 	
 	for(int j=0; j<F.subtract.size(); j++) {
-		int a = (int)((x + F.subtract[j].first) * scale);
-		int b = (int)((y + F.subtract[j].second) * scale);
-		rj -= IntegralImage(a, b);
+		int a = (int)((x + F.subtract[j].first) * scale + X);
+		int b = (int)((y + F.subtract[j].second) * scale + Y);
 
+		if (a >= getHeight() || b >= getWidth() ) return -INF;
+
+		rj -= IntegralImage(a, b, F.channel);
 	}
 
 	return rj;
@@ -147,24 +162,26 @@ void Image::nacrtajTocke( IplImage *slika, vector < pair<int,int> > tocke, float
 	char *data = slika->imageData;
 	int step = slika->widthStep;
 	int chan = slika->nChannels;
-	int sirina = 3;
-
+	int sirina = 1;
+	
 	for(int i=0; i<tocke.size(); i++) {
-		int a = (int) (tocke[i].first * scale) + pomX;
-		int b = (int) (tocke[i].second * scale) + pomY;
+		int a = (int)( (tocke[i].first) * scale + pomX);
+		int b = (int)( (tocke[i].second) * scale + pomY);
+		//cout << "Crtam tocke: " << a << " " << b << " scale: " << scale << endl;
 
 		for(int x=a-sirina; x<a+sirina; x++)
 			for(int y=b-sirina; y<b+sirina; y++) {
-				if (x < 0 || y < 0 || x >= (int)( image->height * scale) || y >= (int)( image->width * scale)) continue;
+				//cout << "rubovi: " <<  x << " " << y << endl;
 
-				data[ x * step + y * chan + 0 ] = 200;
-				data[ x * step + y * chan + 1 ] = 200;
-				data[ x * step + y * chan + 2 ] = 200;
+				if (x < 0 || y < 0 || x >= (int)( slika->height) || y >= (int)( slika->width)) continue;
+
+				data[ x * step + y * chan + 0 ] = 0;
+				data[ x * step + y * chan + 1 ] = 0;
+				data[ x * step + y * chan + 2 ] = 250;
 			}
 	}
 }
 
-//TODO: funkcija trenutno ne radi kako treba
 vector<Image*> Image::loadAllImagesFromDirectory(string dir) {
 	string file = dir + "\\files.txt";
 	vector < Image* > rjesenje;
@@ -181,60 +198,160 @@ vector<Image*> Image::loadAllImagesFromDirectory(string dir) {
 	return rjesenje;
 }
 
-int Image::SearchDirectory(LPCWSTR dir, std::vector<std::string> &refvecFiles,
-                    const std::string        &refcstrRootDirectory,
-                    const std::string        &refcstrExtension,
-                    bool                     bSearchSubdirectories)
-{
-  std::string     strFilePath;             // Filepath
-  std::string     strPattern;              // Pattern
-  std::string     strExtension;            // Extension
-  HANDLE          hFile;                   // Handle to file
-  WIN32_FIND_DATA FileInformation;         // File information
+void Image::evaluirajLevel( vector< Feature > features ) {
+	float trenScale = 1;
+	float stepScale = 1.25;
+
+	//sumiraj weight za sve feature-e
+	float ukupniTreshold = 0;
+	for(int i=0; i<features.size(); i++)
+		ukupniTreshold += features[i].weight;
+	ukupniTreshold /= 2;
+
+	IplImage* tmpImage = cvCreateImage( cvSize(image->width, image->height),image->depth, image->nChannels);		
+	cvCopyImage( image, tmpImage );
 
 
-  strPattern = refcstrRootDirectory + "\\*.*";
-  wchar_t* text = new wchar_t[100];
-  MultiByteToWideChar(CP_ACP, NULL, strPattern.c_str(), -1, text, strPattern.size() );
-  
-  hFile = FindFirstFile( (LPCWSTR)dir, &FileInformation);  
-  if(hFile != INVALID_HANDLE_VALUE)
-  {
-    do
-    {
-      if(FileInformation.cFileName[0] != '.')
-      {
-        strFilePath.erase();
-        strFilePath = refcstrRootDirectory + "\\" + (char *)(FileInformation.cFileName);
+	for(;trenScale<10; trenScale *= stepScale) {	
+	//{ trenScale = 8;
+ 		int velicinaSkoka = ( trenScale + 1 ) * 4;
+		int velicinaProzora = trenScale * 20;
+		int brFalse = 0, brTrue = 0;
 
-        if(FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-        {
-        }
-        else
-        {		  
-		  
-          // Check extension
-          strExtension = (char *)FileInformation.cFileName;
-          strExtension = strExtension.substr(strExtension.rfind(".") + 1);
+		for(int i=0; i<getHeight(); i+= velicinaSkoka) {
+			for(int j=0; j<getWidth(); j+=velicinaSkoka) {
+				float suma = 0;
 
-		  cout << strFilePath << endl;
-          if(strExtension == refcstrExtension)
-          {
-            // Save filename
+				for(int k=0; k<features.size(); k++) {					
+					features[k].scale *= trenScale;
+					int val = evaluateBaseFeature( features[k], i, j );
+					features[k].scale /= trenScale;
 
-            refvecFiles.push_back(strFilePath);
-          }
-        }
-      }
-    } while(::FindNextFile(hFile, &FileInformation) == TRUE);
+					if (val == -INF) { suma =-INF; break; }
 
-    // Close handle
-    ::FindClose(hFile);
+					suma += ( features[k].usporedba * val > features[k].usporedba * features[k].treshold ) * features[k].weight;
 
-    DWORD dwError = ::GetLastError();
-    if(dwError != ERROR_NO_MORE_FILES)
-      return dwError;
-  }
+					
 
-  return 0;
+				}
+				if (suma == -INF) break;
+
+				if (suma > ukupniTreshold) {					
+						//cout << "DA!!!" << i << " " << j << " " << " " << velicinaProzora << endl;
+
+						//showImageOverlappedWithFeature( features[0], false);
+						nacrtajOkvir( image, i , j, velicinaProzora, 0, 255, 0);
+
+						for(int k=0; k<features.size(); k++) {
+						//{int k = 0;
+						int pomX = (i + features[k].x * trenScale);
+						int pomY = (j + features[k].y * trenScale);
+
+							nacrtajTocke( image, features[k].add, features[k].scale *trenScale, pomX, pomY );
+							nacrtajTocke( image, features[k].subtract, features[k].scale * trenScale, pomX, pomY );
+						}
+						showImage();
+						cvWaitKey(0);
+
+						brTrue++;
+						//showImageOverlappedWithFeature( features[0], i,j , true);
+				} else {
+						//nacrtajOkvir( image, i , j, velicinaProzora, 255, 0, 0);
+						//cout  << "NE!!!" << i << " " << j << endl;
+						brFalse++;
+				}
+			}
+		} 
+		//showImageOverlappedWithFeature( features[0], true);
+
+		cout << "OD UKUPNO: " << brFalse + brTrue << " PROZORA, JA SAM ZA: " << brTrue << " rekao da su znakovi" << endl;
+		showImage();
+		cvCopyImage( tmpImage, image );
+		//cvWaitKey(0);
+
+	}
+	cvWaitKey(0);
+	features[0].scale = 1;
+	features[0].x = 0;
+	features[0].y = 0;
+	
+	showImageOverlappedWithFeature( features[0], true);
+}
+
+void Image::nacrtajOkvir(IplImage *slika, int X, int Y, int velicina, int b, int g, int r) {
+	char *data = slika->imageData;
+	int step = slika->widthStep;
+	int chan = slika->nChannels;
+
+	vector < pair<int,int> > tocke;
+	for(int i=X; i<X+velicina; i++) {
+		tocke.push_back( make_pair( i, Y + velicina ) );
+		tocke.push_back( make_pair( i, Y) );
+	}
+	for(int j=Y; j<Y+velicina; j++) {
+		tocke.push_back( make_pair( X, j) );
+		tocke.push_back( make_pair( X + velicina, j) );
+	}
+
+	for(int i=0; i<tocke.size(); i++) {
+		int x = tocke[i].first;
+		int y = tocke[i].second;
+
+		data[ x * step + y * chan + 0 ] = b;
+		data[ x * step + y * chan + 1 ] = g;
+		data[ x * step + y * chan + 2 ] = r;
+	}
+
+}
+
+void Image::evaluateCascade(Cascade kaskada) {
+	cout << "EVALUIRAM KASKADU NA SLICI" << endl;
+	float trenScale = 1;
+	float stepScale = 1.25;
+	int k;
+
+	IplImage* tmpImage = cvCreateImage( cvSize(image->width, image->height),image->depth, image->nChannels);		
+	cvCopyImage( image, tmpImage );
+
+	for(;trenScale<10; trenScale *= stepScale) {	
+	//{ trenScale = 1.55;
+		int velicinaSkoka = ( trenScale + 1 ) * 4;
+		int velicinaProzora = trenScale * 20;
+
+		int brFalse = 0, brTrue = 0;
+		for(int i=0; i<getHeight(); i+= velicinaSkoka) {
+			for(int j=0; j<getWidth(); j+=velicinaSkoka) {
+
+				for(k=0; k<kaskada.cascade.size(); k++) {
+					if (evaluateCascadeLevel( i, j, velicinaProzora, trenScale, kaskada, k) == false) break;					
+				}
+
+				if ( k == kaskada.cascade.size() ) { //prosao je sve elemente kaskade, ovo je pronadeni znak
+					cout << "NASAO!!!" << i << " " << j << " " << velicinaProzora << " " << velicinaSkoka << endl;
+					brTrue ++;
+                    nacrtajOkvir( image, i, j, velicinaProzora, 0, 0, 255 );
+		
+				} else {
+					brFalse ++;
+				}
+			}
+		}
+		cout << "OD UKUPNO: " << brFalse + brTrue << " PROZORA, JA SAM ZA: " << brTrue << " rekao da su znakovi" << endl;
+		showImage();
+		cvCopyImage( tmpImage, image );
+	}
+
+}
+
+bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, int scale, Cascade &kaskada, int index) {
+	double sum = 0.;
+	for(int i=0; i<kaskada.cascade[index].size(); i++) {
+		kaskada.cascade[index][i].scale *= scale;
+		sum += evaluateTrainedFeature( kaskada.cascade[index][i], X, Y, false );
+		kaskada.cascade[index][i].scale /= scale;
+	}
+	//debug( sum );
+	//debug( kaskada.levelThreshold[index] );
+	if (sum > kaskada.levelThreshold[index]) return true;
+	else return false;
 }
