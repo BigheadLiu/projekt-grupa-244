@@ -10,7 +10,6 @@ using namespace std;
  * @author: Ivan Kusalic
  */
 
-#define NUM_CHANNELS 3
 
 class Feature
 {
@@ -45,10 +44,11 @@ public:
 	 * prozor je odreden svojim polozajem u slici (gornji, lijevi vrh => x, y) i sirinom i visinom
 	 * step odreduje pomak za koliko se pixela pomice feature osnovne velicine
 	 * scaleFactor odreduje kakav je odnos izmedu dvije susjedne velicine featurea
+	 * numberOfChannels na koliko kanala (odnosno boja) ce se generirati featuri
 	 *
 	 * veci feature se pomice za isti iznos koliko i feature osnovne velicine
 	 */
-	static vector<Feature> generateAll(int width, int height, int step, float scaleFactor);
+	static vector<Feature> generateAll(int width, int height, int step, float scaleFactor, int numberOfChannels);
 
 	static void loadBaseFeatures(string file);  // dohvaca osnovne featureove iz filea
 };

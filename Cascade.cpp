@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include <iostream>
 #include "Cascade.h"
 
 #include <vector>
@@ -45,7 +46,7 @@ void Cascade::saveCascade(string file)
 		
 		for(j=0;j<cascade[i].size();j++){
 			fprintf(out,"%d %d %d %d ",cascade[i][j].width,cascade[i][j].height,cascade[i][j].x,cascade[i][j].y);
-			fprintf(out,"%f %f %d\n",cascade[i][j].scale,cascade[i][j].weight, cascade[i][j].channel);
+			fprintf(out,"%f %f %d %d %d\n",cascade[i][j].scale,cascade[i][j].weight, cascade[i][j].channel, cascade[i][j].usporedba, cascade[i][j].treshold);
 
 			fprintf(out,"%d\n",cascade[i][j].add.size());
 			for(int tn=cascade[i][j].add.size(),k=0;k<tn;k++)
@@ -101,18 +102,18 @@ void Cascade::loadCascade(string file) {
 	
 	cascade.clear();
 	
-	int m;
-	fscanf(in,"%d",&n);
+	int k = 0;
+	fscanf(in,"%d\n",&n);
 
 	cascade.resize(n);
 
 	for(int tn,j,i=0;i<n;i++) {
-		fscanf(in,"%d",&m);
+		fscanf(in,"%d",&k);
 		
-		cascade[i].resize(m);
-		for(j=0;j<m;j++){
+		cascade[i].resize(k);
+		for(j=0;j<k;j++){
 			fscanf(in,"%d %d %d %d",&(cascade[i][j].width),&(cascade[i][j].height),&(cascade[i][j].x),&(cascade[i][j].y));
-			fscanf(in,"%f %f %d",&(cascade[i][j].scale),&(cascade[i][j].weight), &(cascade[i][j].channel));
+			fscanf(in,"%f %f %d %d %d",&(cascade[i][j].scale),&(cascade[i][j].weight), &(cascade[i][j].channel), &(cascade[i][j].usporedba), &(cascade[i][j].treshold));
 
 			fscanf(in,"%d",&tn);
 			cascade[i][j].add.resize(tn);
@@ -128,9 +129,9 @@ void Cascade::loadCascade(string file) {
 
 	levelThreshold.clear();
 
-	fscanf(in,"%d",&m);
-	levelThreshold.resize(m);
-	for(int i=0;i<m;i++)
+	fscanf(in,"%d",&k);
+	levelThreshold.resize(k);
+	for(int i=0;i<k;i++)
 		fscanf(in,"%d", &levelThreshold[i]);
 
 	fclose(in);

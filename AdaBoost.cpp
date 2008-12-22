@@ -28,8 +28,14 @@ AdaBoost::~AdaBoost(void)
 *		vraca T naucenih featura sa pripadnim tezinama
 */
 
-#define debug(x) cout << x << endl;
-#define debug2(x) cout << #x << ": " << x << endl;
+#ifndef NODEBUG
+	#define debug(x) cout << x << endl;
+	#define debug2(x) cout << #x << ": " << x << endl;
+#else
+	#define debug(x) ;
+	#define debug2(x) ;
+#endif
+
 
 void ispisi(vector <float> ispis) {
 	for(int i=0; i<ispis.size(); i++) cout << ispis[i] << " ";
@@ -92,6 +98,7 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 		for(int j=0; j<featureValue.size(); j++) {
 			//odredi <T+, T->
 			pair< float, float > total = make_pair( sumWeight( weightPositive ), sumWeight( weightNegative ));
+
 			//ispisi( weightPositive );
 			pair< float, float > curr(0., 0. );
 
@@ -122,31 +129,44 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 		}
 		
 		//update the weights
-		cout << "Error: " << error << " | ";
-		float beta = error / (1 - error);	
-		if (beta > 1e6) beta = 1e6;
-		float alpha = log( 1 / beta );		
-		//system("pause");
+		#ifndef NODEBUG
+			cout << "Error: " << error << " | ";
+		#endif
 
-		for(int k=0; k<featureValue[ bestFeature ].size(); k++) {
-			int val = featureValue[ bestFeature ][k].value;
-			int index = featureValue[ bestFeature ][k].index;
-			int correct = featureValue[ bestFeature ][k].positive;
+		if (error != 0) {
+			float beta = error / (1 - error);	
+			float alpha = log( 1 / beta );			
+
+			for(int k=0; k<featureValue[ bestFeature ].size(); k++) {
+				int val = featureValue[ bestFeature ][k].value;
+				int index = featureValue[ bestFeature ][k].index;
+				int correct = featureValue[ bestFeature ][k].positive;
 			
-			//if classified correctly, multiply by beta
-			if (correct == ( p * val < p * treshold )) {
-				if (correct == true) weightPositive[ index ] *= beta;
-				else				 weightNegative[ index ] *= beta;
-			}			
+				//if classified correctly, multiply by beta
+				if (correct == ( p * val < p * treshold )) {
+					if (correct == true) weightPositive[ index ] *= beta;
+					else				 weightNegative[ index ] *= beta;
+				}			
+			}
+
+			rjesenje.push_back( features[bestFeature] );		
+			rjesenje.back().treshold = treshold;	
+			rjesenje.back().weight = alpha;		
+			rjesenje.back().usporedba = p;
+
+		} else {
+			rjesenje.push_back( features[bestFeature] );		
+			rjesenje.back().treshold = treshold;	
+			rjesenje.back().weight = 1e5;		
+			rjesenje.back().usporedba = p;
 		}
 		
-		rjesenje.push_back( features[bestFeature] );		
-		rjesenje.back().treshold = treshold;	
-		rjesenje.back().weight = alpha;		
-		rjesenje.back().usporedba = p;
 
 	}
-	cout << endl;
+	#ifndef NODEBUG
+		cout << endl;
+	#endif
+
 	return rjesenje;
 }
 
@@ -170,15 +190,3 @@ float AdaBoost::sumWeight( vector< float > weight) {
 	for(int i=0; i<weight.size(); i++) rj += weight[i];
 	return rj;
 }
-
-/*
-pair<float, float> AdaBoost::sumFeatureWeight( vector< triple > & featureValue) {
-	float sumP = 0., sumN = 0.;
-
-	for(int i=0; i<featureValue.size(); i++) {		
-		if (featureValue[i].positive == true) sumP += featureValue[i].value;
-		else								  sumN += featureValue[i].value;
-	}
-
-	return make_pair( sumP, sumN );
-}*/

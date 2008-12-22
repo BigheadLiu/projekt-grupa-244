@@ -97,7 +97,7 @@ public:
 	/*
 	* Evaluira cijeli level kaskade
 	*/
-	void Image::evaluirajLevel( vector< Feature > features ); // ovo sluzi samo za testiranje, prava funkcija za evaluaciju level kaskade je navedena kasnije
-	void Image::evaluateCascade(Cascade kaskada);
+	void Image::evaluirajLevel( vector< Feature > features ); // ovo sluzi samo za testiranje, prava funkcija za evaluaciju level kaskade je navedena kasnije	
+	void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale, float zavrsniScale);
 	bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, int scale, Cascade &kaskada, int index);
 };

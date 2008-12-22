@@ -29,14 +29,14 @@ Feature::Feature(int w,int h,vector<pair<int,int> > zb,vector<pair<int,int> > od
 	width=tWeight;
 }
 
-vector<Feature> Feature::generateAll(int width, int height, int step, float scaleFactor)
+vector<Feature> Feature::generateAll(int width, int height, int step, float scaleFactor, int numberOfChannels)
 {
 	vector<Feature> ret;
 	
 	vector<Feature> &bf=allBaseFeatures;
 	
 	float f;
-	for(int chan=0; chan<NUM_CHANNELS; chan++)
+	for(int chan=0; chan<numberOfChannels; chan++)
 		for(int i,j,k=0;k<bf.size();k++)
 			for(f=1;f*bf[k].width<width && f*bf[k].height<height;f*=scaleFactor)
 				for(i=0;(int)(i+f*bf[k].width)<width;i+=step)

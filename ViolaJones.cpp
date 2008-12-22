@@ -35,7 +35,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 	int n;  // broj featureova u trenutnom levelu kaskade
 	
 	pair<double,double> tmpRet;  // pomocna varijabla
-	Feature::generateAll(20,20, 1, 1.25);
+	Feature::generateAll(20,20, 1, 1.25, 3);
 
 	while(tmpF>targetF) {
 		cout << "nivo kaskade: " << i+1 << ". "<< " Broj znakova: " << P.size() << " " << "Broj ne znakova: " << N.size() << " " << endl;
