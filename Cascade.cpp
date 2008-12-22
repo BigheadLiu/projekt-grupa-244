@@ -45,7 +45,7 @@ void Cascade::saveCascade(string file)
 		
 		for(j=0;j<cascade[i].size();j++){
 			fprintf(out,"%d %d %d %d ",cascade[i][j].width,cascade[i][j].height,cascade[i][j].x,cascade[i][j].y);
-			fprintf(out,"%f %f\n",cascade[i][j].scale,cascade[i][j].weight);
+			fprintf(out,"%f %f %d\n",cascade[i][j].scale,cascade[i][j].weight, cascade[i][j].channel);
 
 			fprintf(out,"%d\n",cascade[i][j].add.size());
 			for(int tn=cascade[i][j].add.size(),k=0;k<tn;k++)
@@ -93,7 +93,7 @@ void Cascade::loadCascade(string file) {
 			od.push_back(make_pair(a,b));
 		}
 
-		bf.push_back(Feature(w,h,zb,od,-1,-1,-1,-1));
+		bf.push_back(Feature(w,h,zb,od,-1,-1,-1,-1, 0)); //na kanalu 0 je default
 	}
 
 
@@ -112,7 +112,7 @@ void Cascade::loadCascade(string file) {
 		cascade[i].resize(m);
 		for(j=0;j<m;j++){
 			fscanf(in,"%d %d %d %d",&(cascade[i][j].width),&(cascade[i][j].height),&(cascade[i][j].x),&(cascade[i][j].y));
-			fscanf(in,"%f %f",&(cascade[i][j].scale),&(cascade[i][j].weight));
+			fscanf(in,"%f %f %d",&(cascade[i][j].scale),&(cascade[i][j].weight), &(cascade[i][j].channel));
 
 			fscanf(in,"%d",&tn);
 			cascade[i][j].add.resize(tn);

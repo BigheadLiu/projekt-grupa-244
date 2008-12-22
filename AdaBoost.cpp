@@ -5,8 +5,10 @@
 #include "Image.h"
 #include <vector>
 #include "AdaBoost.h"
+#include <climits>
 using namespace std;
 
+#define INF INT_MAX / 2
 AdaBoost::AdaBoost(void)
 {
 }
@@ -38,38 +40,47 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 	vector< float > weightPositive, weightNegative;
 	vector <Feature> rjesenje;
 
-	debug("ZAPOCINJE ADABOOST TRAINING" );
+	debug2( positive.size() );
+	debug2( negative.size() );
+	debug2( features.size() );
+	debug2(T);
 
+	debug("POSTAVLJAM DEFAULT TEZINA" );
 	//pocetna inicijalizacija tezina	
 	for(int i=0; i<positive.size(); i++) 
 		weightPositive.push_back( 0.5 / positive.size() );	
 	for(int i=0; i<negative.size(); i++)
 		weightNegative.push_back( 0.5 / negative.size() );
 
-	debug("POSTAVLJAM DEFAULT TEZINA" );
 	//potrebno je za svaku sliku na pocetku evaluirati svaki feature
 	//te zatim sortirati prema vrijednostima featura
 	vector < vector < triple > > featureValue;
 
+	debug("EVALUIRAM FEATURE NA SLIKAMA" );
 	for(int i=0; i<features.size(); i++) {
 		vector<  triple > tmp;
+		bool broken = false;
+
 		for(int j=0; j<positive.size(); j++)  {
 			int val = positive[j]->evaluateBaseFeature( features[i] );
-//			int val = (rand() % 100)* 20 + 1000;			
+			if (val == -INF) {broken = true; break; }//izlaz ako feature nije dobar
+
 			tmp.push_back( triple(j, val, true) );
-		}
+		}		
+		if ( broken == true ) continue; //izlaz ako feature nije dobar
 
 		for(int j=0; j<negative.size(); j++) {
 			int val = negative[j]->evaluateBaseFeature( features[i] );
-//			int val = (rand() % 100) * 20;
+			if (val == -INF) break;
+
 			tmp.push_back( triple(j, val, false) );
 		}
 
 		featureValue.push_back( tmp );
-		sort( featureValue[i].begin(), featureValue[i].end() );
+		sort( featureValue.back().begin(), featureValue.back().end() );
 	}
 
-	debug("EVALUIRAM FEATURE NA SLIKAMA" );
+	debug("ZAPOCINJE ODABIR NAJBOLJIH FEATURA" );
 
 	for(int i=0; i<T; i++) {		
 		normalizeWeights( weightPositive, weightNegative );
@@ -78,13 +89,13 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 		float error = 1e9, treshold = 0.;
 		//select best weak classifier
 
-		for(int j=0; j<features.size(); j++) {
+		for(int j=0; j<featureValue.size(); j++) {
 			//odredi <T+, T->
 			pair< float, float > total = make_pair( sumWeight( weightPositive ), sumWeight( weightNegative ));
 			//ispisi( weightPositive );
 			pair< float, float > curr(0., 0. );
 
-			for(int k=0; k<featureValue[j].size(); k++) {
+			for(int k=0; k<featureValue[j].size(); k++) {		
 				int index = featureValue[j][k].index;
 				int value = featureValue[j][k].value;				
 
@@ -111,15 +122,15 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 		}
 		
 		//update the weights
-		cout << "Current error at this step: ";
-		debug2( error );
+		cout << "Current error at this step: " << error << endl;		
 		debug2(treshold);
+		
 		float beta = error / (1 - error);	
+		if (beta > 1e6) beta = 1e6;
 		float alpha = log( 1 / beta );		
-		system("pause");
+		//system("pause");
 
 		for(int k=0; k<featureValue[ bestFeature ].size(); k++) {
-			
 			int val = featureValue[ bestFeature ][k].value;
 			int index = featureValue[ bestFeature ][k].index;
 			int correct = featureValue[ bestFeature ][k].positive;
@@ -130,13 +141,14 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 				else				 weightNegative[ index ] *= beta;
 			}			
 		}
-
 		
 		rjesenje.push_back( features[bestFeature] );		
 		rjesenje.back().treshold = treshold;	
 		rjesenje.back().weight = alpha;		
-	}
+		rjesenje.back().usporedba = p;
 
+	}
+	
 	return rjesenje;
 }
 
