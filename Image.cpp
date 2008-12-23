@@ -128,7 +128,7 @@ void Image::showImageOverlappedWithFeature(const Feature &f, int X, int Y, bool 
 
 float Image::evaluateTrainedFeature(const Feature &F, int X, int Y, bool ispisi) {	
 	int val = evaluateBaseFeature( F, X, Y, ispisi );
-	return  (F.usporedba * val < F.usporedba * F.treshold * F.scale) * F.weight;
+	return  (F.usporedba * val < F.usporedba * F.treshold) * F.weight;
 }
 
 int Image::evaluateBaseFeature(const Feature &F, int X, int Y, bool ispisi) {	
@@ -271,7 +271,7 @@ void Image::evaluirajLevel( vector< Feature > features ) {
 	features[0].scale = 1;
 	features[0].x = 0;
 	features[0].y = 0;
-	
+		
 	showImageOverlappedWithFeature( features[0], true);
 }
 
@@ -317,8 +317,8 @@ void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale
 		int velicinaProzora = trenScale * 20;
 
 		int brFalse = 0, brTrue = 0;
-		for(int i=0; i<getHeight(); i+= velicinaSkoka) {
-			for(int j=0; j<getWidth(); j+=velicinaSkoka) {
+		for(int i=0; i+velicinaProzora<getHeight(); i+= velicinaSkoka) {
+			for(int j=0; j+velicinaProzora<getWidth(); j+=velicinaSkoka) {
 
 				for(k=0; k<kaskada.cascade.size(); k++) {
 					if (evaluateCascadeLevel( i, j, velicinaProzora, trenScale, kaskada, k) == false) break;					
