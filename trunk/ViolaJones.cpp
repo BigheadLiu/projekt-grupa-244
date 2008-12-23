@@ -37,6 +37,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 	pair<double,double> tmpRet;  // pomocna varijabla
 	Feature::generateAll(20,20, 1, 1.25, 3);
 
+
 	while(tmpF>targetF) {
 		cout << "nivo kaskade: " << i+1 << ". "<< " Broj znakova: " << P.size() << " " << "Broj ne znakova: " << N.size() << " " << endl;
 		i++;
@@ -84,23 +85,21 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 
 // Evaluate current cascaded classifier on validation set to determine tmpF and tmpD
 pair<double,double> ViolaJones::evaluateOnTest(Cascade &kaskada) { 
-	int errP=0, errN=0;  // broj gresaka na P i na N
+	int corrP=0, errN=0;  // broj gresaka na P i na N
 	
 	for(int i=0;i<positiveTest.size();i++)
-		if(!evaluate(positiveTest[i],kaskada)) errP++;
+		if(evaluate(positiveTest[i],kaskada)) corrP++;
 	
 	for(int i=0;i<negativeTest.size();i++)
-		if(!evaluate(negativeTest[i],kaskada)) errN++;
+		if(evaluate(negativeTest[i],kaskada)) errN++;
 	
-	debug( kaskada.cascade.size() );
-	debug( kaskada.levelThreshold[0] );
 	debug( positiveTest.size() );
 	debug( negativeTest.size() );
-	debug( errP );
+	debug( corrP );
 	debug( errN );
 	//system("pause");
 	
-	return make_pair(errN/(double)positiveTest.size(),errP/(double)negativeTest.size());//?????????????
+	return make_pair(errN/(double)positiveTest.size(),corrP/(double)negativeTest.size());//?????????????
 }
 
 // za zadanu integralnu sliku vraca da li je svrstana pozitivno ili negativno
@@ -116,9 +115,9 @@ bool ViolaJones::evaluate(Image *iim, Cascade &kaskada) {
 
 		//cout << iim << " " << sum << " " << kaskada.levelThreshold[i] << endl;		
 		
-		if(sum < kaskada.levelThreshold[i]) return true;  // nije proso i-ti level kaskade
+		if(sum < kaskada.levelThreshold[i]) return false;  // nije proso i-ti level kaskade
 	}
-	return false;
+	return true;
 }
 
 /*
@@ -127,7 +126,7 @@ bool ViolaJones::evaluate(Image *iim, Cascade &kaskada) {
  */
 void ViolaJones::evaluateOnTrainNegative(vector<Image*> &N, Cascade &kaskada) {
 	for(int i=0;i<negativeTrain.size();i++)
-		if(!evaluate(negativeTrain[i],kaskada)) N.push_back(negativeTrain[i]);
+		if(evaluate(negativeTrain[i],kaskada)) N.push_back(negativeTrain[i]);
 }
 
 /*
@@ -137,7 +136,7 @@ void ViolaJones::evaluateOnTrainNegative(vector<Image*> &N, Cascade &kaskada) {
  * koristi binary search za pronalazak thresholda
  */
 void ViolaJones::decraseThreshold(int ith, double minD, Cascade &kaskada) {
-	int errP;  // broj gresaka na P
+	int corrP;  // broj tocnih na P
 	double tmpD;  // detection rade s trenutnim thresholdom
 	
 	
@@ -150,16 +149,19 @@ void ViolaJones::decraseThreshold(int ith, double minD, Cascade &kaskada) {
 	while(up - down > 1e-3) {
 		mid=kaskada.levelThreshold[ith]=(down+up)/2;		
 		
-		errP=0;
+		corrP=0;
 		for(int i=0;i<positiveTest.size();i++)
-			if(!evaluate(positiveTest[i],kaskada)) errP++;
+			if(evaluate(positiveTest[i],kaskada)) corrP++;
 
 		//tmpD=errP/(double)negativeTest.size(); >??????????????????????? ili positiveTest
 		
-		tmpD=errP/(double)negativeTest.size(); 				
+		tmpD=corrP/(double)negativeTest.size(); 				
 
 		if(tmpD<minD+1e-9) up=mid;
 		else down=mid;
 
 	}
+	mid=kaskada.levelThreshold[ith] = down;
+	debug(mid);
+	debug(tmpD);
 }

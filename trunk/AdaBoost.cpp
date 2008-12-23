@@ -44,6 +44,7 @@ void ispisi(vector <float> ispis) {
 
 vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&negative, vector< Feature > &features, int T) {
 	vector< float > weightPositive, weightNegative;
+	vector < Feature > dobriFeaturi;
 	vector <Feature> rjesenje;
 
 	debug2( positive.size() );
@@ -69,17 +70,21 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 
 		for(int j=0; j<positive.size(); j++)  {
 			int val = positive[j]->evaluateBaseFeature( features[i] );
-			if (val == -INF) {broken = true; break; }//izlaz ako feature nije dobar
+			if (val == -INF) broken = true; //izlaz ako feature nije dobar
 
 			tmp.push_back( triple(j, val, true) );
 		}		
-		if ( broken == true ) continue; //izlaz ako feature nije dobar
 
 		for(int j=0; j<negative.size(); j++) {
 			int val = negative[j]->evaluateBaseFeature( features[i] );
-			if (val == -INF) break;
+			if (val == -INF) broken = true; //izlaz ako feature nije ispravan
 
 			tmp.push_back( triple(j, val, false) );
+		}
+
+		if ( broken == true ) { //ako feature nije ispravan sve vrijednosti postavi na random, to ce ka iskljucit iz odabira
+			for(int i=0; i<tmp.size(); i++)
+				tmp[i].value = rand() % 100;			
 		}
 
 		featureValue.push_back( tmp );
@@ -130,7 +135,7 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 		
 		//update the weights
 		#ifndef NODEBUG
-			cout << "Error: " << error << " | ";
+			cout << "Error: " << error << "(" << bestFeature << ")" << " | ";
 		#endif
 
 		if (error != 0) {
@@ -159,6 +164,7 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 			rjesenje.back().treshold = treshold;	
 			rjesenje.back().weight = 1e5;		
 			rjesenje.back().usporedba = p;
+			break;
 		}
 		
 

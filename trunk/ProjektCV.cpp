@@ -87,8 +87,8 @@ void testViolaJonesLoadFromFile(string file) {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	testViolaJones();
-	//testViolaJonesLoadFromFile("KaskadaTest.cascade");
+	//testViolaJones();
+	testViolaJonesLoadFromFile("KaskadaTest.cascade");
 	system("pause");
 
 	return 0;
