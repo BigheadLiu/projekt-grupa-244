@@ -14,7 +14,7 @@ Cascade::~Cascade(void)
 }
 
 void Cascade::saveCascade(string file)
-{
+{ 
 	FILE *out=fopen(file.c_str(),"w");
 	
 	// snimnje osnovnih featureove:

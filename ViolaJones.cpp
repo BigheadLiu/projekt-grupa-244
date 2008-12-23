@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "ViolaJones.h"
+#include "ViolaJones.h" 
 #include <iostream>
 using namespace std;
 
@@ -37,7 +37,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 	Feature::generateAll(22,22, 1, 1.25, 3);
 
 	while(tmpF>targetF) {
-		cout << "nivo kaskade: " << i+1 << ". "<< " Broj znakova: " << P.size() << " " << "Broj ne znakova: " << N.size() << " " << endl;
+		cout << "nivo kaskade: " << i+2 << ". "<< " Broj znakova: " << P.size() << " " << "Broj ne znakova: " << N.size() << " " << endl;
 		i++;
 		n=0;
 		tmpF=lastF;
@@ -97,7 +97,7 @@ pair<double,double> ViolaJones::evaluateOnTest(Cascade &kaskada) {
 	debug( errN );
 	//system("pause");
 	
-	return make_pair(errN/(double)positiveTest.size(),corrP/(double)negativeTest.size());//?????????????
+	return make_pair(errN/(double)negativeTest.size(),corrP/(double)positiveTest.size());//?????????????
 }
 
 // za zadanu integralnu sliku vraca da li je svrstana pozitivno ili negativno
@@ -153,7 +153,7 @@ void ViolaJones::decraseThreshold(int ith, double minD, Cascade &kaskada) {
 
 		//tmpD=errP/(double)negativeTest.size(); >??????????????????????? ili positiveTest
 		
-		tmpD=corrP/(double)negativeTest.size(); 				
+		tmpD=corrP/(double)positiveTest.size(); 				
 
 		if(tmpD<minD+1e-9) up=mid;
 		else down=mid;

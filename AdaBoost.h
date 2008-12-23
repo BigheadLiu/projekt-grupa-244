@@ -29,8 +29,8 @@ private:
 		}
 	};
 
-	static pair<float, float> sumFeatureValue( vector< triple > & featureValue);
 	static float sumWeight( vector< float > weight);
+	static void AdaBoost::normalizeWeights( vector< float > &weightPositive, vector<float> &weightNegative);
 
 public:
 	AdaBoost(void);

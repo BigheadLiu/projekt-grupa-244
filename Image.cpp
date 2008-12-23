@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "Cascade.h"
-#include <vector>
+#include <vector> 
 #include "Feature.h"
 #include <algorithm>
 #include "Image.h"

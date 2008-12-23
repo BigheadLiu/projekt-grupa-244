@@ -178,10 +178,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\BaseFeature.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Cascade.cpp"
 				>
 			</File>
@@ -229,10 +225,6 @@
 			>
 			<File
 				RelativePath=".\AdaBoost.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseFeature.h"
 				>
 			</File>
 			<File
