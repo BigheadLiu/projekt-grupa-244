@@ -19,8 +19,10 @@ using namespace std;
 int NUM_CHANNELS;
 
 Image::Image(string fileName) 
-{	
+{		
 	image = cvLoadImage( fileName.c_str() );		
+
+	//cout << "(" << image->height << " " << image->width << ")   ";
 
 	NUM_CHANNELS = image->nChannels;
 
@@ -141,7 +143,7 @@ int Image::evaluateBaseFeature(const Feature &F, int X, int Y, bool ispisi) {
 		int a = (int)((x + F.add[i].first * scale) + X);
 		int b = (int)((y + F.add[i].second * scale) + Y);		
 
-		if (a >= getHeight() || b >= getWidth() ) return -INF;
+		if (a >= getHeight() || b >= getWidth() ) return -INF;				
 		rj += IntegralImage( a, b, F.channel);
 	}
 	

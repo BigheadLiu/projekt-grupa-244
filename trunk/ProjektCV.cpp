@@ -11,9 +11,16 @@
 #include <iostream>
 using namespace std;
 
+/**
+* Sadrzi main metodu za pokretanje algoritma za ucenje, te testiranje kaskade.
+*
+*/
+
 void writeFeatures(vector <Feature> tmp ) {
 	cout << "All Features: " << tmp.size() << endl;
 	for(int i=0; i<tmp.size(); i++) {
+		cout << tmp[i].width << " " << tmp[i].height << endl;
+
 		cout << "zbroji: ";
 
 		for(int j=0; j<tmp[i].add.size(); j++) {
@@ -69,11 +76,13 @@ void testViolaJones() {
 	vector< Image* > slikeTrue = Image::loadAllImagesFromDirectory( "c:\\Images\\true" );	
 	vector< Image* > slikeFalse= Image::loadAllImagesFromDirectory( "c:\\Images\\false" );	
 	Feature::loadBaseFeatures("basefeatures.txt");
+
 	Feature::generateAll( 20, 20, 3, 1.25, 3 );
 
 	Cascade kaskada;
 	ViolaJones kuso( slikeTrue, slikeFalse, slikeTrue, slikeFalse );
-	kuso.buildCascade( 0.3, 0.95, 0.001, kaskada );
+	kuso.buildCascade( 0.1, 0.99, 0.001, kaskada );
+	//kuso.buildCascade( 0.3, 0.80, 0.01, kaskada );
 
 	kaskada.saveCascade("KaskadaTest.cascade" );
 	testirajKaskadu( kaskada );
@@ -87,8 +96,8 @@ void testViolaJonesLoadFromFile(string file) {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	//testViolaJones();
-	testViolaJonesLoadFromFile("KaskadaTest.cascade");
+	testViolaJones();
+	//testViolaJonesLoadFromFile("KaskadaTest.cascade");
 	system("pause");
 
 	return 0;

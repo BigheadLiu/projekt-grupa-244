@@ -5,7 +5,6 @@ using namespace std;
 
 #define MAX 1000000000
 #define debug(x) cout << #x << ": " << x << endl;
-//resolved confilicts
 
 ViolaJones::ViolaJones(vector<Image*> ptr, vector<Image*>ntr, vector<Image*>pte, vector<Image*> nte)
 {
@@ -35,8 +34,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 	int n;  // broj featureova u trenutnom levelu kaskade
 	
 	pair<double,double> tmpRet;  // pomocna varijabla
-	Feature::generateAll(20,20, 1, 1.25, 3);
-
+	Feature::generateAll(22,22, 1, 1.25, 3);
 
 	while(tmpF>targetF) {
 		cout << "nivo kaskade: " << i+1 << ". "<< " Broj znakova: " << P.size() << " " << "Broj ne znakova: " << N.size() << " " << endl;
