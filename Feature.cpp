@@ -26,7 +26,7 @@ Feature::Feature(int w,int h,vector<pair<int,int> > zb,vector<pair<int,int> > od
 	x=tX;
 	y=tY;
 	scale=tScale;
-	width=tWeight;
+	weight=tWeight;
 }
 
 vector<Feature> Feature::generateAll(int width, int height, int step, float scaleFactor, int numberOfChannels)

@@ -7,6 +7,12 @@ using namespace std;
 
 #pragma once
 
+/**
+* Klasa koja predstavlja jednu sliku (ili za testiranje ili za ucenje )
+* Ima metode za evaluaciju featura i cijele kaskade nad slikom te
+* mogucnost iscrtavanja kvadrata nad oznacenom regijom slike.
+*/
+
 class Image
 {
 private:
@@ -95,9 +101,14 @@ public:
 	float Image::evaluateTrainedFeature(const Feature &F, int X=0, int Y=0, bool ispisi=false);
 
 	/*
-	* Evaluira cijeli level kaskade
+	* Evaluira jedan level kaskade. Ova metoda sluzi samo za testiranje AdaBoost algoritma i u konacnoj verziji se moze izbaciti
 	*/
 	void Image::evaluirajLevel( vector< Feature > features ); // ovo sluzi samo za testiranje, prava funkcija za evaluaciju level kaskade je navedena kasnije	
+	
+	/*
+	* Evaluacija cijele kaskade, sluzi za testiranje cjelokupnog algoritma. Na slici oznacava 
+	* regije za koje algoritam kaze da su znakovi	
+	*/
 	void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale, float zavrsniScale);
 	bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, int scale, Cascade &kaskada, int index);
 };

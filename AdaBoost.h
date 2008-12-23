@@ -8,6 +8,10 @@
 #include <vector>
 #include "AdaBoost.h"
 using namespace std;
+/**
+* Klasa koja obavlja algoritma AdaBoost prema clanku
+*
+*/
 
 class AdaBoost
 {
@@ -26,7 +30,6 @@ private:
 	};
 
 	static pair<float, float> sumFeatureValue( vector< triple > & featureValue);
-	static void normalizeWeights( vector< float > &weightPositive, vector<float> &weightNegative);
 	static float sumWeight( vector< float > weight);
 
 public:

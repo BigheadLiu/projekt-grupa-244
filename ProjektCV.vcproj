@@ -267,6 +267,10 @@
 			>
 		</Filter>
 		<File
+			RelativePath=".\basefeatures.txt"
+			>
+		</File>
+		<File
 			RelativePath=".\bftest.txt"
 			>
 		</File>
