@@ -43,6 +43,8 @@ void ispisi(vector <float> ispis) {
 }
 
 vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&negative, vector< Feature > &features, int T) {
+	int brNegative = min( positive.size(), negative.size() );
+
 	vector< float > weightPositive, weightNegative;
 	vector < Feature > dobriFeaturi;
 	vector <Feature> rjesenje;
@@ -56,8 +58,8 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 	//pocetna inicijalizacija tezina	
 	for(int i=0; i<positive.size(); i++) 
 		weightPositive.push_back( 0.5 / positive.size() );	
-	for(int i=0; i<negative.size(); i++)
-		weightNegative.push_back( 0.5 / negative.size() );
+	for(int i=0; i<brNegative; i++)
+		weightNegative.push_back( 0.5 / brNegative );
 
 	//potrebno je za svaku sliku na pocetku evaluirati svaki feature
 	//te zatim sortirati prema vrijednostima featura
@@ -75,7 +77,7 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 			tmp.push_back( triple(j, val, true) );
 		}		
 
-		for(int j=0; j<negative.size(); j++) {
+		for(int j=0; j<brNegative; j++) {
 			int val = negative[j]->evaluateBaseFeature( features[i] );
 			if (val == -INF) broken = true; //izlaz ako feature nije ispravan
 
