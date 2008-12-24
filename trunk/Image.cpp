@@ -128,9 +128,9 @@ void Image::showImageOverlappedWithFeature(const Feature &f, int X, int Y, bool 
 	cvReleaseImage( &tmpImage );
 }
 
-float Image::evaluateTrainedFeature(const Feature &F, int X, int Y, bool ispisi) {	
+float Image::evaluateTrainedFeature(const Feature &F, int X, int Y, bool ispisi, float scale) {	
 	int val = evaluateBaseFeature( F, X, Y, ispisi );
-	return  (F.usporedba * val < F.usporedba * F.treshold) * F.weight;
+	return  (F.usporedba * val < F.usporedba * F.treshold * scale) * F.weight;
 }
 
 int Image::evaluateBaseFeature(const Feature &F, int X, int Y, bool ispisi) {	
@@ -314,11 +314,11 @@ void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale
 	IplImage* tmpImage = cvCreateImage( cvSize(image->width, image->height),image->depth, image->nChannels);		
 	cvCopyImage( image, tmpImage );
 
+	int brFalse = 0, brTrue = 0;
 	for(;trenScale<zavrsniScale; trenScale *= stepScale) {	
 		int velicinaSkoka = ( trenScale + 1 ) * 4;
 		int velicinaProzora = trenScale * 20;
 
-		int brFalse = 0, brTrue = 0;
 		for(int i=0; i+velicinaProzora<getHeight(); i+= velicinaSkoka) {
 			for(int j=0; j+velicinaProzora<getWidth(); j+=velicinaSkoka) {
 
@@ -327,9 +327,9 @@ void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale
 				}
 
 				if ( k == kaskada.cascade.size() ) { //prosao je sve elemente kaskade, ovo je pronadeni znak
-#ifndef NODEBUG
-					cout << "NASAO!!!" << i << " " << j << " " << velicinaProzora << " " << velicinaSkoka << endl;
-#endif
+//#ifndef NODEBUG
+//					cout << "NASAO!!!" << i << " " << j << " " << velicinaProzora << " " << velicinaSkoka << endl;
+//#endif
 					brTrue ++;
                     nacrtajOkvir( image, i, j, velicinaProzora, 0, 0, 255 );
 		
@@ -338,22 +338,22 @@ void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale
 				}
 			}
 		}
+	}
 
 #ifndef NODEBUG
 		cout << "OD UKUPNO: " << brFalse + brTrue << " PROZORA, JA SAM ZA: " << brTrue << " rekao da su znakovi. To je: " << (float)brTrue / (brFalse + brTrue) << " od ukupnog broja." << endl;
 #endif
 
-		showImage();
-		cvCopyImage( tmpImage, image );
-	}
 
+	showImage();
+	cvCopyImage( tmpImage, image );
 }
 
 bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, int scale, Cascade &kaskada, int index) {
 	double sum = 0.;
 	for(int i=0; i<kaskada.cascade[index].size(); i++) {
 		kaskada.cascade[index][i].scale *= scale;
-		sum += evaluateTrainedFeature( kaskada.cascade[index][i], X, Y, false );
+		sum += evaluateTrainedFeature( kaskada.cascade[index][i], X, Y, false, scale );
 		kaskada.cascade[index][i].scale /= scale;
 	}
 

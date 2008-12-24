@@ -97,8 +97,10 @@ public:
 
 	/*
 	* Evaluira Feature na danom slikom, uracunava i njegov weight koji je prije izracunat pomocu AdaBoost-a
+	* scale - default je 1., radi se scale-u unutar velike slike za testiranje. Uvijek prilikom ucenje taj scale-e treba biti 1. Sluzi
+	* za skaliranje treshold-a
 	*/
-	float Image::evaluateTrainedFeature(const Feature &F, int X=0, int Y=0, bool ispisi=false);
+	float Image::evaluateTrainedFeature(const Feature &F, int X=0, int Y=0, bool ispisi=false, float scale=1.);
 
 	/*
 	* Evaluira jedan level kaskade. Ova metoda sluzi samo za testiranje AdaBoost algoritma i u konacnoj verziji se moze izbaciti

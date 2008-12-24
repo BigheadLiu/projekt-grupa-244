@@ -67,7 +67,7 @@ void testAdaBoost() {
 void testirajKaskadu( Cascade &kaskada ) {
 	vector < Image* > testSlike = Image::loadAllImagesFromDirectory( "c:\\Images\\test" );
 	for(int i=0; i<10; i++) {
-		testSlike[i]->evaluateCascade( kaskada, 1., 1.25, 8. );
+		testSlike[i]->evaluateCascade( kaskada, 1., 1.25, 6. );
 	}
 }
 
@@ -80,7 +80,7 @@ void testViolaJones() {
 
 	Cascade kaskada;
 	ViolaJones kuso( slikeTrue, slikeFalse, slikeTrue, slikeFalse );
-	kuso.buildCascade( 0.1, 0.99, 0.001, kaskada );
+	kuso.buildCascade( 0.1, 0.99, 0.0001, kaskada );
 	//kuso.buildCascade( 0.3, 0.80, 0.01, kaskada );
 
 	kaskada.saveCascade("KaskadaTest.cascade" );

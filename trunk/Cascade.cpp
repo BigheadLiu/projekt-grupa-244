@@ -14,7 +14,7 @@ Cascade::~Cascade(void)
 }
 
 void Cascade::saveCascade(string file)
-{ 
+{ 	
 	FILE *out=fopen(file.c_str(),"w");
 	
 	// snimnje osnovnih featureove:
@@ -50,20 +50,20 @@ void Cascade::saveCascade(string file)
 
 			fprintf(out,"%d\n",cascade[i][j].add.size());
 			for(int tn=cascade[i][j].add.size(),k=0;k<tn;k++)
-				fprintf(out,"%d %d\n",cascade[i][j].add[k],cascade[i][j].add[k]);
+				fprintf(out,"%d %d\n",cascade[i][j].add[k].first,cascade[i][j].add[k].second);
 
 			fprintf(out,"%d\n",cascade[i][j].subtract.size());
 			for(int tn=cascade[i][j].subtract.size(),k=0;k<tn;k++)
-				fprintf(out,"%d %d\n",cascade[i][j].subtract[k],cascade[i][j].subtract[k]);
+				fprintf(out,"%d %d\n",cascade[i][j].subtract[k].first,cascade[i][j].subtract[k].second);
 		}
 	}
 	fprintf(out,"%d\n",levelThreshold.size());
 	for(int i=0;i<levelThreshold.size();i++)
-		fprintf(out,"%d\n", levelThreshold[i]);
+		fprintf(out,"%lf\n", levelThreshold[i]);
 
 	fclose(out);
+	cout << "SNIMANJE KASKADE GOTOVO." << endl;
 }
-
 
 void Cascade::loadCascade(string file) {
 	FILE *in=fopen(file.c_str(),"r");
@@ -118,12 +118,12 @@ void Cascade::loadCascade(string file) {
 			fscanf(in,"%d",&tn);
 			cascade[i][j].add.resize(tn);
 			for(int k=0;k<tn;k++)
-				fscanf(in,"%d %d",&(cascade[i][j].add[k]),&(cascade[i][j].add[k]));
+				fscanf(in,"%d %d",&(cascade[i][j].add[k].first),&(cascade[i][j].add[k].second));
 
 			fscanf(in,"%d",&tn);
 			cascade[i][j].subtract.resize(tn);
 			for(int k=0;k<tn;k++)
-				fscanf(in,"%d %d",&(cascade[i][j].subtract[k]),&(cascade[i][j].subtract[k]));
+				fscanf(in,"%d %d",&(cascade[i][j].subtract[k].first),&(cascade[i][j].subtract[k].second));
 		}
 	}
 
@@ -132,7 +132,8 @@ void Cascade::loadCascade(string file) {
 	fscanf(in,"%d",&k);
 	levelThreshold.resize(k);
 	for(int i=0;i<k;i++)
-		fscanf(in,"%d", &levelThreshold[i]);
+		fscanf(in,"%lf", &levelThreshold[i]);
 
 	fclose(in);
 }
+   
