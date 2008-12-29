@@ -60,7 +60,7 @@ public:
 	/* 
 	* Evaluira zadani feature nad slikom, te vraca izracunatu vrijednost
 	*/
-	int evaluateBaseFeature(const Feature &F, int X = 0, int Y = 0, bool ispisi=false);
+	int evaluateBaseFeature(const Feature &F, int X = 0, int Y = 0, bool ispisi=false, float scale=1.0);
 
 	/*
 	* prikazuje sliku na ekranu
@@ -112,5 +112,5 @@ public:
 	* regije za koje algoritam kaze da su znakovi	
 	*/
 	void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale, float zavrsniScale);
-	bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, int scale, Cascade &kaskada, int index);
+	bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, float scale, Cascade &kaskada, int index);
 };
