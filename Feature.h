@@ -13,6 +13,8 @@ using namespace std;
 
 class Feature
 {
+private:
+	static pair<int,int> Feature::calcScale(pair<int,int> tocka, float scaleX, float scaleY, int X, int Y);
 public:
 	Feature(void);
 	~Feature(void);
@@ -48,7 +50,6 @@ public:
 	 *
 	 * veci feature se pomice za isti iznos koliko i feature osnovne velicine
 	 */
-	static vector<Feature> generateAll(int width, int height, int step, float scaleFactor, int numberOfChannels);
-
+	static vector<Feature>& generateAll(int width, int height, int step, float scaleFactor, int numberOfChannels);
 	static void loadBaseFeatures(string file);  // dohvaca osnovne featureove iz filea
 };

@@ -34,7 +34,8 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 	int n;  // broj featureova u trenutnom levelu kaskade
 	
 	pair<double,double> tmpRet;  // pomocna varijabla
-	Feature::generateAll(22,22, 1, 1.25, 3);
+
+	recoverFromError(i, lastD, lastF,N ); // oporavak od greske u slucaju ako je prethodni postupak ucenja prekinut greskom na racunalu
 
 	while(tmpF>targetF) {
 		cout << "nivo kaskade: " << i+2 << ". "<< " Broj znakova: " << P.size() << " " << "Broj ne znakova: " << N.size() << " " << endl;
@@ -78,7 +79,33 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 		 * and put any false detections into the set N:
 		 */
 		if(tmpF>targetF) evaluateOnTrainNegative(N,kaskada);
+	
+		spremiPodatke(kaskada, i, lastD, lastF); // spremanje kaskade zbog mogucnosti nastavka treniranja u slucaju greske na racunalu
 	}
+	clearTempData(); //brise file-ove nastale privremenim spremanjem kaskade na disk zbog mogucnosti nastavka procesa ucenja
+}
+
+void ViolaJones::clearTempData() {
+	system("del podaci.temp");
+}
+
+void ViolaJones::spremiPodatke(Cascade kaskada, int &i, double &lastD, double &lastF) {
+	kaskada.saveCascade("temp.cascade");
+	FILE *fout = fopen("podaci.temp", "w");
+		fprintf(fout, "%lf %lf %d", lastD, lastF, i );
+	fclose(fout);
+}
+
+void ViolaJones::recoverFromError(int &i, double &lastD, double &lastF, vector< Image* > &N) {
+	Cascade kaskada;	
+	FILE *fin = fopen("podaci.temp", "r");
+		if (fin == NULL) return;
+		cout << "RECOVERING FROM ERROR!!!" << endl;
+		fscanf(fin, "%lf %lf %d", &lastD, &lastF, &i);
+	fclose(fin);	
+	kaskada.loadCascade("temp.cascade");
+	N.clear();
+	evaluateOnTrainNegative( N, kaskada);
 }
 
 // Evaluate current cascaded classifier on validation set to determine tmpF and tmpD

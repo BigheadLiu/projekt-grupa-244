@@ -129,27 +129,26 @@ void Image::showImageOverlappedWithFeature(const Feature &f, int X, int Y, bool 
 }
 
 float Image::evaluateTrainedFeature(const Feature &F, int X, int Y, bool ispisi, float scale) {	
-	int val = evaluateBaseFeature( F, X, Y, ispisi );
-	return  (F.usporedba * val < F.usporedba * F.treshold * scale) * F.weight;
+	int val = evaluateBaseFeature( F, X, Y, ispisi, scale );
+	return  (F.usporedba * val < F.usporedba * F.treshold * scale * scale) * F.weight;
 }
 
-int Image::evaluateBaseFeature(const Feature &F, int X, int Y, bool ispisi) {	
+int Image::evaluateBaseFeature(const Feature &F, int X, int Y, bool ispisi, float scale) {	
 	int rj = 0;
 	int x = F.x;
-	int y = F.y;
-	float scale = F.scale;
+	int y = F.y;	
 			
 	for(int i=0; i<F.add.size(); i++) {
-		int a = (int)((x + F.add[i].first * scale) + X);
-		int b = (int)((y + F.add[i].second * scale) + Y);		
+		int a = (int)((x + F.add[i].first * F.scale) * scale + X);
+		int b = (int)((y + F.add[i].second * F.scale) * scale + Y);		
 
 		if (a >= getHeight() || b >= getWidth() ) return -INF;				
 		rj += IntegralImage( a, b, F.channel);
 	}
 	
 	for(int j=0; j<F.subtract.size(); j++) {
-		int a = (int)((x + F.subtract[j].first) * scale + X);
-		int b = (int)((y + F.subtract[j].second) * scale + Y);
+		int a = (int)((x + F.subtract[j].first * F.scale) * scale + X);
+		int b = (int)((y + F.subtract[j].second * F.scale) * scale + Y);
 
 		if (a >= getHeight() || b >= getWidth() ) return -INF;
 
@@ -304,7 +303,7 @@ void Image::nacrtajOkvir(IplImage *slika, int X, int Y, int velicina, int b, int
 }
 
 void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale, float zavrsniScale) {
-
+#define SHOW_PICTURE_FOR_EACH_SCALE
 	debug("EVALUIRAM KASKADU NA SLICI");
 
 	float trenScale = pocetniScale;
@@ -316,8 +315,8 @@ void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale
 
 	int brFalse = 0, brTrue = 0;
 	for(;trenScale<zavrsniScale; trenScale *= stepScale) {	
-		int velicinaSkoka = ( trenScale + 1 ) * 4;
-		int velicinaProzora = trenScale * 20;
+		int velicinaSkoka = ( trenScale + 1 ) * 5;
+		int velicinaProzora = trenScale * 24;
 
 		for(int i=0; i+velicinaProzora<getHeight(); i+= velicinaSkoka) {
 			for(int j=0; j+velicinaProzora<getWidth(); j+=velicinaSkoka) {
@@ -332,12 +331,19 @@ void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale
 //#endif
 					brTrue ++;
                     nacrtajOkvir( image, i, j, velicinaProzora, 0, 0, 255 );
-		
 				} else {
 					brFalse ++;
 				}
 			}
 		}
+#ifdef SHOW_PICTURE_FOR_EACH_SCALE
+		cout << "OD UKUPNO: " << brFalse + brTrue << " PROZORA, JA SAM ZA: " << brTrue << " rekao da su znakovi. To je: " << (float)brTrue / (brFalse + brTrue) << " od ukupnog broja." << endl;
+		showImage();
+		cvCopyImage( tmpImage, image );				
+		brTrue = 0; brFalse = 0;
+#endif
+
+
 	}
 
 #ifndef NODEBUG
@@ -349,12 +355,12 @@ void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale
 	cvCopyImage( tmpImage, image );
 }
 
-bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, int scale, Cascade &kaskada, int index) {
+bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, float scale, Cascade &kaskada, int index) {
 	double sum = 0.;
 	for(int i=0; i<kaskada.cascade[index].size(); i++) {
-		kaskada.cascade[index][i].scale *= scale;
+		//kaskada.cascade[index][i].scale *= scale;
 		sum += evaluateTrainedFeature( kaskada.cascade[index][i], X, Y, false, scale );
-		kaskada.cascade[index][i].scale /= scale;
+		//kaskada.cascade[index][i].scale /= scale;
 	}
 
 	if (sum > kaskada.levelThreshold[index]) return true;

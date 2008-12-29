@@ -61,4 +61,21 @@ public:
 	 * koristi binary search za pronalazak thresholda
 	 */
 	void decraseThreshold(int ith, double minD, Cascade &kaskada);
+
+	/*
+	* Funkcija koja se koristi u slucaju da dode do greske na racunalu prilikom postupka ucenja.
+	* Nakon svakog novo stvorenog levela kaskade vrsi se spremanje kaskade u file temp.cascade.
+	* Ovo funkcija cita zadnji level kaskade iz tog file-a i nastavlja sa ucenjem	
+	*/
+	void recoverFromError(int &i, double &lastD, double &lastF, vector< Image* > &N);
+	/*
+	* Brise podatke nastale pohranom privremenih podataka za oporavak od pogreske.
+	*/
+	void clearTempData();
+
+    /*
+	* Sprema podatke bitne za nastavak procesa ucenja na disk u fileove: podaci.temp, temp.cascade
+	*/
+	void ViolaJones::spremiPodatke(Cascade kaskada, int &i, double &lastD, double &lastF);
+
 };
