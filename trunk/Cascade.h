@@ -17,6 +17,12 @@ public:
 	Cascade(void);
 	~Cascade(void);
 
+	int redniBroj;
+	float weight;
+	friend bool operator < (const Cascade &a, const Cascade &b) {
+		return a.redniBroj < b.redniBroj;
+	}
+
 	/*
 	 * sama kaskada
 	 *

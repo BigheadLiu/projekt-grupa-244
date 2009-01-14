@@ -42,7 +42,33 @@ void ispisi(vector <float> ispis) {
 	cout << endl;	
 }
 
-vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&negative, vector< Feature > &features, int T) {
+vector<Feature> AdaBoost::startTraining( vector<Image*>&positive, vector<Image*> &negative, vector< Feature > &features, int T) {
+	return train( positive, negative, features, T );
+	
+	int dio = features.size() / 3;
+	vector < Feature > najbolji;
+	vector < Feature > tren;
+
+	for(int i=0; i<features.size(); i++) {
+		tren.push_back( features[i] );
+
+		if (tren.size() >= dio || i == features.size() - 1) { //nadi najbolji feature po dijelovima			
+			int koliko  = tren.size() / dio;
+			if (koliko < T) koliko = T;
+			if (koliko > tren.size() ) koliko = tren.size();
+
+			vector < Feature > tmp = train( positive, negative, tren, koliko);				
+
+			najbolji.insert( najbolji.end(), tmp.begin(), tmp.end() );
+			tren.clear();
+		}
+	}
+
+	cout << "NAJBOLJI FEATURI UKUPNO";
+	return train( positive, negative, najbolji, T ); // od najboljih featura po dijelovima, nadi najbolje ukupno
+}
+
+vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative, vector< Feature > &features, int T) {
 	int brNegative = min( positive.size(), negative.size() );
 
 	vector< float > weightPositive, weightNegative;
@@ -64,10 +90,13 @@ vector<Feature> AdaBoost::startTraining(vector<Image*>&positive, vector<Image*>&
 	//potrebno je za svaku sliku na pocetku evaluirati svaki feature
 	//te zatim sortirati prema vrijednostima featura
 	vector < vector < triple > > featureValue;
+		
+	featureValue.reserve( features.size() );	
 
 	debug("EVALUIRAM FEATURE NA SLIKAMA" );
 	for(int i=0; i<features.size(); i++) {
 		vector<  triple > tmp;
+		tmp.reserve( positive.size() + brNegative );
 		bool broken = false;
 
 		for(int j=0; j<positive.size(); j++)  {

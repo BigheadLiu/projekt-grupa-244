@@ -1,6 +1,7 @@
 // ProjektCV.cpp : Defines the entry point for the console application.
 //
 #include "stdafx.h"
+#include "GuiCommunication.h"
 #include "AdaBoost.h"
 #include "Cascade.h"
 #include "ViolaJones.h"
@@ -66,20 +67,24 @@ void testAdaBoost() {
 
 void testirajKaskadu( Cascade &kaskada ) {
 	vector < Image* > testSlike = Image::loadAllImagesFromDirectory( "c:\\Images\\test" );
+	vector < Cascade > kaskade;
+	kaskade.push_back( kaskada );
+
 	for(int i=0; i<testSlike.size(); i++) 
-		testSlike[i]->evaluateCascade( kaskada, 1., 1.25, 4. );
+		testSlike[i]->evaluateCascade( kaskade, 1., 1.25, 4., 1, 0 );
+	Image::writeTestData();
 }
 
 void testViolaJones() {
-	vector< Image* > slikeTrue = Image::loadAllImagesFromDirectory( "c:\\Images\\true" );	
-	vector< Image* > slikeFalse= Image::loadAllImagesFromDirectory( "c:\\Images\\false" );	
+	vector< Image* > slikeTrue = Image::loadAllImagesFromDirectory( "c:\\Images\\true2" );	
+	vector< Image* > slikeFalse= Image::loadAllImagesFromDirectory( "c:\\Images\\false2", true, 10000 );	
 	Feature::loadBaseFeatures("basefeatures.txt");
 
-	Feature::generateAll(24, 24, 2, 1.3, 3);
+	Feature::generateAll(24, 24, 2, 1.3f, 3);
 
 	Cascade kaskada;
-	ViolaJones kuso( slikeTrue, slikeFalse, slikeTrue, slikeFalse );
-	kuso.buildCascade( 0.1, 0.999, 0.0001, kaskada );
+	ViolaJones kuso( slikeTrue, slikeFalse, "c:\\Images\\false", 1000, 10000 );
+	kuso.buildCascade( 0.1, 0.999, 0.000001, kaskada );
 
 	kaskada.saveCascade("KaskadaTest.cascade" );
 	testirajKaskadu( kaskada );
@@ -91,11 +96,24 @@ void testViolaJonesLoadFromFile(string file) {
 	testirajKaskadu( kaskada );
 }
 
+void testCommunicationWithGui() {
+	Image *slika;
+	GuiCommunication::start();
+	while( (slika = GuiCommunication::getNextImage()) != NULL ) {
+		vector <Image::Rectangle > rj = slika->evaluateCascade( GuiCommunication::getCascade(), GuiCommunication::getPocetniScale(), 
+																GuiCommunication::getStepScale(), GuiCommunication::getZavrsniScale(),
+																GuiCommunication::getIsSlijedno(), GuiCommunication::getTreshold() );		
+		GuiCommunication::saveResults( rj );
+		delete slika;
+	}
+	GuiCommunication::sendResults();
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
-	testViolaJones();
+	//testViolaJones();
 	//testViolaJonesLoadFromFile("KaskadaTest.cascade");
-	system("pause");
+	testCommunicationWithGui();
 
 	return 0;
 }

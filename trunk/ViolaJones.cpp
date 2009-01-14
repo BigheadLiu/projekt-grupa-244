@@ -6,12 +6,17 @@ using namespace std;
 #define MAX 1000000000
 #define debug(x) cout << #x << ": " << x << endl;
 
-ViolaJones::ViolaJones(vector<Image*> ptr, vector<Image*>ntr, vector<Image*>pte, vector<Image*> nte)
+ViolaJones::ViolaJones(vector<Image*>pte, vector<Image*> nte, string negativeTestDirectory, int minNumber, int loadNumber)
 {
-	positiveTrain=ptr;
-	negativeTrain=ntr;
+	//positiveTrain=ptr;
+	//negativeTrain=ntr;
 	positiveTest=pte;
 	negativeTest=nte;
+	clearedNegativeTestSize = 0;
+	this->negativeTestDirectory = negativeTestDirectory;
+
+	this->minNumber = minNumber;
+	this->loadNumber = loadNumber;
 }
 
 /*
@@ -22,8 +27,8 @@ ViolaJones::ViolaJones(vector<Image*> ptr, vector<Image*>ntr, vector<Image*>pte,
  */
 void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada) {
 	//P - set of positive examples; N - set of negative examples:
-	vector<Image*> P(positiveTrain.begin(),positiveTrain.end());
-	vector<Image*> N(negativeTrain.begin(),negativeTrain.end());	
+	vector<Image*> P(positiveTest.begin(),positiveTest.end());
+	vector<Image*> N(negativeTest.begin(),negativeTest.end());	
 
 	double tmpF=1.0;  // trenutni false positive rate
 	double lastF=1.0;  // false positive rate prethodnog nivoa
@@ -45,7 +50,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 				
 		kaskada.cascade.push_back( vector<Feature>(0) ); // dodajem prazan vektor na kraj da napravim mjesto za sljedeci level kaskade
 		while(tmpF>f*lastF) {
-			n+=20;
+			n+=80;
 			cout << "broj featura: " << n << " false positive: " << tmpF << " " << "trazimo: " << targetF << endl;
 			//cout << n << endl;
 
@@ -79,6 +84,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 		 * and put any false detections into the set N:
 		 */
 		if(tmpF>targetF) evaluateOnTrainNegative(N,kaskada);
+		cout << "Trenutno imam: " << negativeTest.size() << " negativnih primjera.";
 	
 		spremiPodatke(kaskada, i, lastD, lastF); // spremanje kaskade zbog mogucnosti nastavka treniranja u slucaju greske na racunalu
 	}
@@ -124,7 +130,7 @@ pair<double,double> ViolaJones::evaluateOnTest(Cascade &kaskada) {
 	debug( errN );
 	//system("pause");
 	
-	return make_pair(errN/(double)negativeTest.size(),corrP/(double)positiveTest.size());//?????????????
+	return make_pair(errN/(double)(negativeTest.size()+clearedNegativeTestSize),corrP/(double)positiveTest.size());//?????????????
 }
 
 // za zadanu integralnu sliku vraca da li je svrstana pozitivno ili negativno
@@ -150,8 +156,26 @@ bool ViolaJones::evaluate(Image *iim, Cascade &kaskada) {
  * and put any false detections into the set N
  */
 void ViolaJones::evaluateOnTrainNegative(vector<Image*> &N, Cascade &kaskada) {
-	for(int i=0;i<negativeTrain.size();i++)
-		if(evaluate(negativeTrain[i],kaskada)) N.push_back(negativeTrain[i]);
+	for(int i=0;i<negativeTest.size();i++) {
+		if(evaluate(negativeTest[i],kaskada)) N.push_back(negativeTest[i]);
+		else {
+			delete negativeTest[i];
+			clearedNegativeTestSize ++;
+		}
+	}
+
+	negativeTest = N;
+	if (negativeTest.size() < minNumber) {		
+		vector < Image* > tmp = Image::loadAllImagesFromDirectory(negativeTestDirectory, true, loadNumber );
+		cout << "Ucitao sam nove negativne primjere, njih: " << tmp.size() << endl;
+		if (tmp.size() == 0) return;
+
+		for(int i=0; i<tmp.size(); i++)
+			negativeTest.push_back( tmp[i] );
+	
+		N.clear();
+		evaluateOnTrainNegative( N, kaskada );
+    }
 }
 
 /*
