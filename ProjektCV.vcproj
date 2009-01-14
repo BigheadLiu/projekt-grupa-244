@@ -117,6 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files\OpenCV\cxcore\include&quot;;&quot;C:\Program Files\OpenCV\cv\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -135,7 +136,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="cv.lib cvaux.lib cvhaartraining.lib cxcore.lib cxts.lib highgui.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\OpenCV\lib&quot;;&quot;C:\Program Files\OpenCV\bin&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -186,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiCommunication.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Image.cpp"
 				>
 			</File>
@@ -233,6 +240,10 @@
 			</File>
 			<File
 				RelativePath=".\Feature.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiCommunication.h"
 				>
 			</File>
 			<File

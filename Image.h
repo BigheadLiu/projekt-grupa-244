@@ -22,7 +22,7 @@ private:
 	* x - pomak svih koordinata u vectoru tocke za x
 	* y - pomak svih koordinata u vectoru tocke za x
 	*/
-	void nacrtajTocke( IplImage *slika, vector< pair<int,int> > tocke, float scale, int x, int y );
+	void nacrtajTocke( IplImage *slika, vector< pair<int,int> > tocke, float scale, int x, int y, int r=0, int g=0, int b=255 );
 	int *IntegralImage;
 
 public:
@@ -66,6 +66,19 @@ public:
 	* prikazuje sliku na ekranu
 	*/
 	void showImage();
+	/*
+	* Snimi sliku u file	
+	* file ... file u koji treba snimiti slike
+	* width, height velicina za resize slike, ukoliko nije navedeno slika ostaje u prirodnoj velicini
+	*/
+	void saveImage(string file, int x = 0, int y = 0);
+
+	/*
+	* funkcija za spremanje isjecka slike.
+	* U file se sprema dio slike koji pocinje na koordinati (x,y) u oblika kvadrata stranice velicina
+	* Nakon izrezivanja slika se skalira na velicinu (width x height)
+	*/
+	void Image::saveImageExtraction(string file, int x, int y, int velicina, int width, int height, IplImage* image);
 
 	/*
 	* Crta sliku na ekran, te karakteristicne tocke za dani feature
@@ -79,9 +92,30 @@ public:
 	* Ucitava sve slike iz danog direktorija. U tom direktoriju se treba nalazi file "files.txt" u kojem
 	* se nalaze imena svih datoteka sa slikama za ucitavanje. Taj file najlakse je stvoriti
 	* sa naredbom dir /w > files.txt, te zatim obrisati podatke u zaglavlju.
+	* maxNumber... maksimalan broj slika koje da ucita iz direktorija, default je sve slike
 	*/
-	static vector<Image*> Image::loadAllImagesFromDirectory(string directory);
-	
+	static vector<Image*> Image::loadAllImagesFromDirectory(string directory, bool limitLoading = false, int maxNumber = -1);
+	static int dosadUcitano;
+
+	/**
+	* Ukupan broj slika ucitan, odnosno ukupan broj stvorenih klasa Image
+	*/
+	static int ukupanBroj;
+
+	/**
+	* navedena tri broja sluze prilikom evaluacije, naime svako od njih prikazuje broj
+	* primjera prilikom testiranja koji su oznaceni kao prometni znakovi te broj
+	* primjera koji nisu oznaceni kao znakovi
+	*/
+	static int ukupnoEvaluiranoTrue;
+	static int ukupnoEvaluiranoFalse ;
+	static int ukupnoEvaluirano;
+
+	/*
+	* ispisuje podatke o testiranju
+	*/
+	static void writeTestData();
+
 	/*
 	* Trazi sve znakove na zadanoj slici. Vraca vector< Rectangle > koji obiljezava sva moguca pojavljivanja znaka na slici	
 	*/
@@ -111,6 +145,8 @@ public:
 	* Evaluacija cijele kaskade, sluzi za testiranje cjelokupnog algoritma. Na slici oznacava 
 	* regije za koje algoritam kaze da su znakovi	
 	*/
-	void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale, float zavrsniScale);
-	bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, float scale, Cascade &kaskada, int index);
+	vector<Image::Rectangle> evaluateCascade(vector<Cascade>& kaskade, float pocetniScale, float stepScale, float zavrsniScale, int order, float ukupniTreshold);
+	bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, float scale, Cascade &kaskada, int index);	
+	bool postProcess( int x, int y, int velicina );
+	bool evaluateSystem(int i, int j, int velicinaProzora, int trenScale, vector<Cascade>& kaskade, int order, float tresholdUkupno);
 };

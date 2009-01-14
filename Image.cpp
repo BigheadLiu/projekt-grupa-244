@@ -20,6 +20,7 @@ int NUM_CHANNELS;
 
 Image::Image(string fileName) 
 {		
+	Image::ukupanBroj ++;
 	image = cvLoadImage( fileName.c_str() );		
 
 	//cout << "(" << image->height << " " << image->width << ")   ";
@@ -159,7 +160,7 @@ int Image::evaluateBaseFeature(const Feature &F, int X, int Y, bool ispisi, floa
 }
 
 
-void Image::nacrtajTocke( IplImage *slika, vector < pair<int,int> > tocke, float scale, int pomX, int pomY) {
+void Image::nacrtajTocke( IplImage *slika, vector < pair<int,int> > tocke, float scale, int pomX, int pomY, int r, int g, int b) {
 	char *data = slika->imageData;
 	int step = slika->widthStep;
 	int chan = slika->nChannels;
@@ -176,14 +177,15 @@ void Image::nacrtajTocke( IplImage *slika, vector < pair<int,int> > tocke, float
 
 				if (x < 0 || y < 0 || x >= (int)( slika->height) || y >= (int)( slika->width)) continue;
 
-				data[ x * step + y * chan + 0 ] = 0;
-				data[ x * step + y * chan + 1 ] = 0;
-				data[ x * step + y * chan + 2 ] = 250;
+				data[ x * step + y * chan + 0 ] = r;
+				data[ x * step + y * chan + 1 ] = g;
+				data[ x * step + y * chan + 2 ] = b;
 			}
 	}
 }
 
-vector<Image*> Image::loadAllImagesFromDirectory(string dir) {
+vector<Image*> Image::loadAllImagesFromDirectory(string dir, bool limitLoading, int maxNumber) {
+	int brojac = 0;
 	string file = dir + "\\files.txt";
 	vector < Image* > rjesenje;
 	char ime[100];
@@ -191,9 +193,15 @@ vector<Image*> Image::loadAllImagesFromDirectory(string dir) {
 	FILE *fin = fopen(file.c_str(), "r");
 	while( fscanf(fin, "%s", ime) == 1) {
 		string tmp = dir + "\\" + string( ime );
-		
+
+		brojac ++;
+		if (brojac <= dosadUcitano && limitLoading == true) continue;
 		rjesenje.push_back( new Image( tmp ) );
+		
+		if (rjesenje.size() > maxNumber && limitLoading == true) break;
 	}
+	if (limitLoading == true) dosadUcitano = brojac + 1;
+
 	fclose(fin);
 
 	return rjesenje;
@@ -302,16 +310,53 @@ void Image::nacrtajOkvir(IplImage *slika, int X, int Y, int velicina, int b, int
 
 }
 
-void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale, float zavrsniScale) {
-#define SHOW_PICTURE_FOR_EACH_SCALE
+bool Image::evaluateSystem(int i, int j, int velicinaProzora, int trenScale, vector<Cascade>& kaskade, int order, float tresholdUkupno) {
+	int k;
+	if (order == 1) {
+		for(int n=0; n<kaskade.size(); n++) {
+			Cascade& kaskada = kaskade[n];
+
+			for(k=0; k<kaskada.cascade.size(); k++) 
+				if (evaluateCascadeLevel( i, j, velicinaProzora, trenScale, kaskada, k) == false)
+					return false;
+			
+		}
+		return true;
+	} else {
+		float suma = 0.;
+		for(int n=0; n<kaskade.size(); n++) {
+			Cascade& kaskada  = kaskade[n];
+
+			for(k=0; k<kaskada.cascade.size(); k++) 
+				if (evaluateCascadeLevel( i, j, velicinaProzora, trenScale, kaskada, k) == false)
+					break;
+			
+			if (k == kaskada.cascade.size())
+				suma += kaskada.weight;
+		}
+		if (suma >= tresholdUkupno) return true;
+		else return false;
+	}
+
+	
+}
+
+vector<Image::Rectangle> Image::evaluateCascade(vector<Cascade>& kaskade, float pocetniScale, float stepScale, float zavrsniScale, int order, float ukupniTreshold) {
+//#define SHOW_PICTURE_FOR_EACH_SCALE
+//#define SAVE_SELECTED_IMAGES
+//#define SHOW_FEATURE
+//#define SHOW_IMAGE
+	vector < Rectangle > rjesenje;
 	debug("EVALUIRAM KASKADU NA SLICI");
 
 	float trenScale = pocetniScale;
 	//float stepScale = 1.25;
-	int k;
+	int k, n;
 
+#ifdef SHOW_IMAGE
 	IplImage* tmpImage = cvCreateImage( cvSize(image->width, image->height),image->depth, image->nChannels);		
 	cvCopyImage( image, tmpImage );
+#endif
 
 	int brFalse = 0, brTrue = 0;
 	for(;trenScale<zavrsniScale; trenScale *= stepScale) {	
@@ -320,22 +365,37 @@ void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale
 
 		for(int i=0; i+velicinaProzora<getHeight(); i+= velicinaSkoka) {
 			for(int j=0; j+velicinaProzora<getWidth(); j+=velicinaSkoka) {
+				this->ukupnoEvaluirano++;
 
-				for(k=0; k<kaskada.cascade.size(); k++) {
-					if (evaluateCascadeLevel( i, j, velicinaProzora, trenScale, kaskada, k) == false) break;					
-				}
-
-				if ( k == kaskada.cascade.size() ) { //prosao je sve elemente kaskade, ovo je pronadeni znak
-//#ifndef NODEBUG
-//					cout << "NASAO!!!" << i << " " << j << " " << velicinaProzora << " " << velicinaSkoka << endl;
-//#endif
+				//if ( n == kaskade.size() ) { //prosao je sve elemente kaskade, ovo je pronadeni znak
+				if (evaluateSystem(i, j, velicinaProzora, trenScale, kaskade, order, ukupniTreshold) == true) {
 					brTrue ++;
+					this->ukupnoEvaluiranoTrue++;
+#ifdef SHOW_IMAGE
                     nacrtajOkvir( image, i, j, velicinaProzora, 0, 0, 255 );
+#endif
+					rjesenje.push_back( Rectangle(i, j, velicinaProzora, velicinaProzora ) );
+#ifdef SHOW_FEATURE 
+					nacrtajTocke( image, kaskade[0].cascade[0][0].add, trenScale, i, j, 255, 0, 0);
+					nacrtajTocke( image, kaskade[0].cascade[0][0].subtract, trenScale, i, j, 0, 0, 255);
+#endif
+
+
+#ifdef SAVE_SELECTED_IMAGES
+					char tmpBroj[20], tmp[100];
+					strcpy( tmp, "c:\\Images\\false2\\" );
+					itoa( ukupnoEvaluiranoTrue, tmpBroj, 10 );
+					strcat( tmp, tmpBroj );					
+
+					saveImageExtraction( tmp, i, j, velicinaProzora, 24, 24, tmpImage );
+#endif
 				} else {
 					brFalse ++;
+					this->ukupnoEvaluiranoFalse++;
 				}
 			}
 		}
+
 #ifdef SHOW_PICTURE_FOR_EACH_SCALE
 		cout << "OD UKUPNO: " << brFalse + brTrue << " PROZORA, JA SAM ZA: " << brTrue << " rekao da su znakovi. To je: " << (float)brTrue / (brFalse + brTrue) << " od ukupnog broja." << endl;
 		showImage();
@@ -350,9 +410,35 @@ void Image::evaluateCascade(Cascade kaskada, float pocetniScale, float stepScale
 		cout << "OD UKUPNO: " << brFalse + brTrue << " PROZORA, JA SAM ZA: " << brTrue << " rekao da su znakovi. To je: " << (float)brTrue / (brFalse + brTrue) << " od ukupnog broja." << endl;
 #endif
 
-
+#ifdef SHOW_IMAGE
 	showImage();
 	cvCopyImage( tmpImage, image );
+#endif
+	return rjesenje;
+}
+
+bool Image::postProcess( int x, int y, int velicina ) {
+	unsigned char *data = (unsigned char *) image->imageData;
+	int step = image->widthStep;
+	int pocX = x + velicina * 0.1;
+	int krajX = x + velicina * 0.9;
+
+	int pocY = y + velicina * 0.1;
+	int krajY = y + velicina * 0.9;
+
+	cout << endl;
+	for(int i=pocX; i<krajX; i++) {
+		int brojac = 0;
+		for(int j=pocY; j<krajY; j++) {
+			if (data(i, j, 2) > 150) brojac++;
+		}
+
+		cout << "(" << brojac << " " << 0.1 * velicina << ")" << endl;
+		if ( (float) brojac < 0.1 * velicina ) return false;		
+	}
+
+
+	return true;
 }
 
 bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, float scale, Cascade &kaskada, int index) {
@@ -366,3 +452,51 @@ bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, float scale
 	if (sum > kaskada.levelThreshold[index]) return true;
 	else return false;
 }
+
+void Image::saveImage(string file, int width, int height) {
+	if (width == 0 || height == 0) {
+		cvSaveImage( file.c_str(), image );
+		return; 
+	}
+
+	IplImage *tmp = cvCreateImage( cvSize(width, height), image->depth, image->nChannels );
+	cvResize( image, tmp ); 
+	cvSaveImage( file.c_str(), tmp );
+
+	cvReleaseImage( &tmp );
+}
+
+void Image::saveImageExtraction(string file, int x, int y, int velicina, int width, int height, IplImage* image) {	
+	IplImage *tmp = cvCreateImage( cvSize(velicina, velicina), image->depth, image->nChannels );
+
+	unsigned char *data = (unsigned char *) image->imageData;	
+	int step = image->widthStep;
+
+	for(int i=0; i<velicina; i++)
+		for(int j=0; j<velicina; j++) 
+			for(int k=0; k<image->nChannels; k++) 
+				tmp->imageData[i * tmp->widthStep + j * tmp->nChannels + k] = data( (x+i), (y+j), k );
+
+	IplImage *spremi = cvCreateImage( cvSize(width, height), image->depth, image->nChannels );
+	cvResize( tmp, spremi );
+    string fileTmp = file + ".bmp";
+	cvSaveImage( fileTmp.c_str(), spremi );
+	
+	cvReleaseImage( &tmp );
+	cvReleaseImage( &spremi );
+}
+
+
+void Image::writeTestData() {
+	cout << "Ukupan broj prozora za trazenje: " << Image::ukupnoEvaluirano << endl;
+	cout << "Ukupan broj pronadenih znakova: " << Image::ukupnoEvaluiranoTrue << endl;
+	cout << "Ukupan broj isjecaka koji su proglaseni ne-znakovima: " << Image::ukupnoEvaluiranoFalse << endl;
+}
+
+
+int Image::dosadUcitano = 0;
+int Image::ukupanBroj = 0;
+
+int Image::ukupnoEvaluiranoTrue = 0;
+int Image::ukupnoEvaluiranoFalse = 0;
+int Image::ukupnoEvaluirano = 0;

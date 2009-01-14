@@ -22,6 +22,11 @@ public:
 	
 	vector<Image*> positiveTest;  // set (integralnih) slika za testiranje koje su pozitivne
 	vector<Image*> negativeTest;  // set (integralnih) slika za testiranje koje su negativne
+	string negativeTestDirectory;
+	int minNumber; // minimalni broj negativnih test primjera u jednom trenutku
+	int loadNumber; // broj negativnih test primjera koje ce ucitavati u jednom koraku ukoliko ih ima manje od minNumber
+
+	int clearedNegativeTestSize; // broj negativnih primjera koje je obrisao zbog stednje memorije
 	
 	ViolaJones(void)
 	{
@@ -32,7 +37,7 @@ public:
 	}
 	
 	// konstruktor za inicijalizaciju:	
-	ViolaJones(vector<Image*> ptr, vector<Image*> ntr, vector<Image*> pte, vector<Image*> nte);
+	ViolaJones(vector<Image*> pte, vector<Image*> nte, string negativeTestDirectory, int minNumber, int loadNumber);
 	
 	/*
 	 * f - the maximum acceptable false positive rate per layer
