@@ -4,6 +4,7 @@
 #include "Cascade.h"
 #include <vector>
 #include <algorithm>
+#include "ColorSpace.h"
 #include "GuiCommunication.h"
 using namespace std;
 
@@ -41,7 +42,7 @@ void GuiCommunication::sendResults() {
 }
 
 string GuiCommunication::sredi(char *x) {
-	string ok = "-_:.\\";
+	string ok = "-_:.\\ ";
 	char tmp[1000];
 	int d = strlen(x);
 	for(int i=0; i<d; i++) {
@@ -68,7 +69,7 @@ void GuiCommunication::start() {
 			fscanf(fin, "%d %f %f ", &level, &tezina);
 			fgets( ime, 500, fin );
 
-			Cascade tmp = Cascade();
+			Cascade tmp = Cascade(ColorSpace::RGB);
 			tmp.loadCascade( sredi( ime ) );
 			tmp.weight = tezina;
 			
@@ -87,11 +88,11 @@ void GuiCommunication::start() {
 		sort( kaskade.begin(), kaskade.end() );
 
 		fscanf(fin, "%d", &isSlijedno );
-		fscanf(fin, "%d", &brojSlika );
+		fscanf(fin, "%d ", &brojSlika );
 
-		for(int i=0; i<brojSlika; i++) {
-			fscanf(fin, "%s", ime );
-			images.push_back( ime );
+		for(int i=0; i<brojSlika; i++) {			
+			fgets(ime, 500, fin );
+			images.push_back( sredi(ime) );
 		}
 
 		fscanf(fin, "%f", &tresholdUkupni );
@@ -104,7 +105,7 @@ vector<Cascade> GuiCommunication::getCascade() {
 
 Image* GuiCommunication::getNextImage() {	
 	if (brojac >= images.size()) return NULL;
-	Image *slika = new Image( images[ brojac ] );
+	Image *slika = new Image( images[ brojac ] );	
 	GuiCommunication::brojac ++;
 	return slika;
 }

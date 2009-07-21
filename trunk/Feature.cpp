@@ -36,7 +36,7 @@ pair<int,int> Feature::calcScale(pair<int,int> tocka, float scaleX, float scaleY
 	return rj;
 }
 
-vector<Feature>& Feature::generateAll(int width, int height, int step, float scaleFactor, int numberOfChannels)
+vector<Feature>& Feature::generateAll(int width, int height, int step, float scaleFactor, const vector<int>& channels)
 {
 	vector<Feature> ret;
 	
@@ -56,7 +56,8 @@ vector<Feature>& Feature::generateAll(int width, int height, int step, float sca
 
 	generatedFeatures.clear();
 	for(int k=0; k<bf.size(); k++) {//koji osnovni feature 
-		for(int chan=0; chan<numberOfChannels; chan++) // koji kanal
+		for(int i=0; i<channels.size(); i++) {
+			int chan = channels[i];
 			for (float scaleX=1.; scaleX*bf[k].height<height; scaleX*=scaleFactor) //skaliranje po X i Y osi
 				for (float scaleY=1.; scaleY*bf[k].width<width; scaleY*=scaleFactor) 
 					for(int x=0; x+bf[k].height*scaleX<height; x+=step) //pomak po x,y osi
@@ -85,6 +86,7 @@ vector<Feature>& Feature::generateAll(int width, int height, int step, float sca
 							add.clear();
 							subtract.clear();
 						}
+		}
 
 	}
 

@@ -50,6 +50,6 @@ public:
 	 *
 	 * veci feature se pomice za isti iznos koliko i feature osnovne velicine
 	 */
-	static vector<Feature>& generateAll(int width, int height, int step, float scaleFactor, int numberOfChannels);
+	static vector<Feature>& generateAll(int width, int height, int step, float scaleFactor, const vector<int>& channels);
 	static void loadBaseFeatures(string file);  // dohvaca osnovne featureove iz filea
 };

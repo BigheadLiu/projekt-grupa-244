@@ -6,8 +6,8 @@
 #include "Image.h"
 #include <string>
 #include <cv.h>
-#include <iostream>
 #include <highgui.h>
+#include <iostream>
 #include <climits>
 using namespace std;
 
@@ -16,19 +16,29 @@ using namespace std;
 #define data(i,j,k)			data[ (i) * step + (j) * NUM_CHANNELS + (k) ]
 #define INF INT_MAX / 2
 #define debug(x) cout << #x << ": " << x << endl;
-int NUM_CHANNELS;
 
-Image::Image(string fileName) 
+Image::Image(string fileName, int colorspace ) 
 {		
 	Image::ukupanBroj ++;
 	image = cvLoadImage( fileName.c_str() );		
 
-	//cout << "(" << image->height << " " << image->width << ")   ";
-
 	NUM_CHANNELS = image->nChannels;
 
 	if (image == NULL) cout << "Nisam uspio ucitati sliku";
+
+	this->colorspace = colorspace;
+	if (colorspace != ColorSpace::RGB) { //nakon ovog bloka slika je u colorspace-u kojeg zelim
+		IplImage *image2 = cvCreateImage( cvSize( image->width, image->height), image->depth, image->nChannels );
+		int convert[] = { CV_BGR2HSV, CV_BGR2Lab };
+
+		cvCvtColor( image, image2, convert[ colorspace ] );
+		cvCopyImage( image2, image );
+
+		cvReleaseImage( &image2 );
+	} 
+
 	IntegralImage =(int *) malloc( sizeof(int) * image->height * image->width * NUM_CHANNELS );
+
 	int *stupac = (int *) malloc( sizeof(int) * image->height * image->width * NUM_CHANNELS );
 	unsigned char *data = (unsigned char *) image->imageData;	
 
@@ -57,9 +67,15 @@ Image::Image(string fileName)
 
 Image::~Image(void)
 {
-	if( image != NULL) cvReleaseImage( &image );
+	if( image != NULL) cvReleaseImage( &image );	
 	free(IntegralImage);
 }
+
+//int Image::getColorSpaceByName(std::string name) {
+//	string imena[] = { "HSV", "LAB", "RGB" };
+//	for(int i=0; i<3; i++)
+//		if (imena[i] == name) return i;
+//}
 
 string Image::imageData() {
 	char rj[100];
@@ -77,21 +93,36 @@ int Image::getWidth(void) {
 	return image->width;
 }
 
+IplImage* Image::getRgbImage() {
+	IplImage *tmpSlika = cvCreateImage( cvSize( image->width, image->height), image->depth, image->nChannels );
+	int convert = ColorSpace::convertValue( colorspace );
+
+	if ( convert != -1 ) //nakon ovog bloka slika je u RGB colorspace-u
+		cvCvtColor( image, tmpSlika, convert );		
+	else
+		cvCopyImage( image, tmpSlika );
+
+
+	return tmpSlika;
+}
+
 void Image::showImage(void) {
 	const int minVelicina = 100;
 	cvNamedWindow("PRIKAZ SLIKA", CV_WINDOW_AUTOSIZE);
-	
-	if ( min(image->height, image->width) < minVelicina) { //povecaj sliku za bolji pogled
-		int h = image->height * minVelicina / min(image->height, image->width);
-		int w = image->width * minVelicina / min(image->height, image->width);
-		IplImage *tmpSlika = cvCreateImage( cvSize(h, w), image->depth, image->nChannels);
-		cvResize( image, tmpSlika );
+	IplImage* imageRGB = getRgbImage();
+
+	if ( min(imageRGB->height, imageRGB->width) < minVelicina) { //povecaj sliku za bolji pogled
+		int h = imageRGB->height * minVelicina / min(imageRGB->height, imageRGB->width);
+		int w = imageRGB->width * minVelicina / min(imageRGB->height, imageRGB->width);
+		IplImage *tmpSlika = cvCreateImage( cvSize(h, w), imageRGB->depth, imageRGB->nChannels);
+		cvResize( imageRGB, tmpSlika );
 
 		cvShowImage("PRIKAZ SLIKA", tmpSlika );	
-	} else {
-		cvShowImage("PRIKAZ SLIKA", image );	
+	} else { //ako ne zelim skalirat
+		cvShowImage("PRIKAZ SLIKA", imageRGB );	
 	}
 
+	cvReleaseImage( &imageRGB);
 	cvWaitKey(0);
 	cvDestroyWindow("PRIKAZ SLIKA");
 }
@@ -111,8 +142,9 @@ void Image::showImageOverlappedWithFeature(const Feature &f, int X, int Y, bool 
 	int h = (int)( image->height * scaleSlike );
 	int w = (int)( image->width * scaleSlike );
 
-	IplImage *tmpImage = cvCreateImage( cvSize(w,h), image->depth, image->nChannels );
-	cvResize( image, tmpImage );
+	IplImage *imageRGB = getRgbImage();
+	IplImage *tmpImage = cvCreateImage( cvSize(w,h), imageRGB->depth, imageRGB->nChannels );
+	cvResize( imageRGB, tmpImage );
 	
 	//debug( scale );
 	//debug( scaleSlike );
@@ -125,6 +157,7 @@ void Image::showImageOverlappedWithFeature(const Feature &f, int X, int Y, bool 
 	cvShowImage( "PRIKAZ SLIKA", tmpImage );
 	if (wait == true) cvWaitKey(0);
 
+	cvReleaseImage( &imageRGB );
 	cvDestroyWindow("PRIKAZ SLIKA");
 	cvReleaseImage( &tmpImage );
 }
@@ -184,7 +217,7 @@ void Image::nacrtajTocke( IplImage *slika, vector < pair<int,int> > tocke, float
 	}
 }
 
-vector<Image*> Image::loadAllImagesFromDirectory(string dir, bool limitLoading, int maxNumber) {
+/*vector<Image*> Image::loadAllImagesFromDirectory(string dir, bool limitLoading, int maxNumber) {
 	int brojac = 0;
 	string file = dir + "\\files.txt";
 	vector < Image* > rjesenje;
@@ -205,7 +238,7 @@ vector<Image*> Image::loadAllImagesFromDirectory(string dir, bool limitLoading, 
 	fclose(fin);
 
 	return rjesenje;
-}
+}*/
 
 void Image::evaluirajLevel( vector< Feature > features ) {
 	float trenScale = 1;
@@ -223,7 +256,8 @@ void Image::evaluirajLevel( vector< Feature > features ) {
 
 	for(;trenScale<10; trenScale *= stepScale) {	
 	//{ trenScale = 8;
- 		int velicinaSkoka = ( trenScale + 1 ) * 4;
+ 		//int velicinaSkoka = ( trenScale + 1 ) * 4;
+		int velicinaSkoka = trenScale * 2;
 		int velicinaProzora = trenScale * 20;
 		int brFalse = 0, brTrue = 0;
 
@@ -341,22 +375,22 @@ bool Image::evaluateSystem(int i, int j, int velicinaProzora, int trenScale, vec
 	
 }
 
-vector<Image::Rectangle> Image::evaluateCascade(vector<Cascade>& kaskade, float pocetniScale, float stepScale, float zavrsniScale, int order, float ukupniTreshold) {
+vector<Image::Rectangle> Image::evaluateCascade(vector<Cascade>& kaskade, float pocetniScale, float stepScale, float zavrsniScale, int order, float ukupniTreshold, bool showImages) {
 //#define SHOW_PICTURE_FOR_EACH_SCALE
 //#define SAVE_SELECTED_IMAGES
 //#define SHOW_FEATURE
-//#define SHOW_IMAGE
 	vector < Rectangle > rjesenje;
 	debug("EVALUIRAM KASKADU NA SLICI");
 
 	float trenScale = pocetniScale;
-	//float stepScale = 1.25;
 	int k, n;
+	IplImage* tmpImage = NULL;
 
-#ifdef SHOW_IMAGE
-	IplImage* tmpImage = cvCreateImage( cvSize(image->width, image->height),image->depth, image->nChannels);		
-	cvCopyImage( image, tmpImage );
-#endif
+	if (showImages == true) {
+		 tmpImage = cvCreateImage( cvSize(image->width, image->height),image->depth, image->nChannels);		
+		cvCopyImage( image, tmpImage );
+	}
+
 
 	int brFalse = 0, brTrue = 0;
 	for(;trenScale<zavrsniScale; trenScale *= stepScale) {	
@@ -371,9 +405,10 @@ vector<Image::Rectangle> Image::evaluateCascade(vector<Cascade>& kaskade, float 
 				if (evaluateSystem(i, j, velicinaProzora, trenScale, kaskade, order, ukupniTreshold) == true) {
 					brTrue ++;
 					this->ukupnoEvaluiranoTrue++;
-#ifdef SHOW_IMAGE
-                    nacrtajOkvir( image, i, j, velicinaProzora, 0, 0, 255 );
-#endif
+
+					if (showImages == true) 
+						nacrtajOkvir( image, i, j, velicinaProzora, 0, 0, 255 );
+
 					rjesenje.push_back( Rectangle(i, j, velicinaProzora, velicinaProzora ) );
 #ifdef SHOW_FEATURE 
 					nacrtajTocke( image, kaskade[0].cascade[0][0].add, trenScale, i, j, 255, 0, 0);
@@ -410,10 +445,11 @@ vector<Image::Rectangle> Image::evaluateCascade(vector<Cascade>& kaskade, float 
 		cout << "OD UKUPNO: " << brFalse + brTrue << " PROZORA, JA SAM ZA: " << brTrue << " rekao da su znakovi. To je: " << (float)brTrue / (brFalse + brTrue) << " od ukupnog broja." << endl;
 #endif
 
-#ifdef SHOW_IMAGE
-	showImage();
-	cvCopyImage( tmpImage, image );
-#endif
+	if (showImages == true) {
+		showImage();
+		cvCopyImage( tmpImage, image );
+	}
+
 	return rjesenje;
 }
 
