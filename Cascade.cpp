@@ -1,27 +1,33 @@
 #include "StdAfx.h"
 #include <iostream>
 #include "Cascade.h"
-
+#include "Image.h"
 #include <vector>
+
 using namespace std;
 
-Cascade::Cascade(void)
+Cascade::Cascade(int colorspace)
 {
+	this->colorspace = colorspace;
 }
 
 Cascade::~Cascade(void)
 {
 }
 
+int Cascade::colorSpace() {
+	return this->colorspace;
+}
+
 void Cascade::saveCascade(string file)
 { 	
 	FILE *out=fopen(file.c_str(),"w");
 	
-	// snimnje osnovnih featureove:
+	// snimanje osnovnih featureove:
 	
 	vector<Feature> &bf=Feature::allBaseFeatures;
 	
-	fprintf(out,"%d\n",bf.size());
+	fprintf(out,"%d %s\n",bf.size(), ColorSpace::getName( colorspace ) );
 	
 	for(int n,j,i=0;i<bf.size();i++) {
 		fprintf(out,"%d %d\n",bf[i].width,bf[i].height);
@@ -75,8 +81,17 @@ void Cascade::loadCascade(string file) {
 	bf.clear();
 	
 	int n;
-	fscanf(in,"%d",&n);
-	
+
+	char redak[100], colorspace[100];
+	colorspace[0] = 0;
+
+	fgets( redak, 100, in);
+
+	sscanf(redak,"%d %s", &n, colorspace);
+	if ( strlen( colorspace) == 0 ) // ne pise colorspace
+		strcpy( colorspace, "RGB");
+	this->colorspace = ColorSpace::getByName( string(colorspace) );
+
 	for(int a,b,m,w,h,j,i=0;i<n;i++) {
 		fscanf(in,"%d %d",&w,&h);
 

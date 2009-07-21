@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Feature.h"
-
 #include <utility>
 #include <vector>
+#include "ColorSpace.h"
 using namespace std;
 
 /*
@@ -13,12 +13,15 @@ using namespace std;
  */
 class Cascade
 {
+private:
+	int colorspace;
 public:
-	Cascade(void);
+	Cascade(int colorspace);
 	~Cascade(void);
 
 	int redniBroj;
 	float weight;
+
 	friend bool operator < (const Cascade &a, const Cascade &b) {
 		return a.redniBroj < b.redniBroj;
 	}
@@ -47,4 +50,10 @@ public:
 	 * usput loada i osnovne featureove
 	 */
 	void loadCascade(string file);
+
+	/**
+	* Vraca colorspace u kojem je kaskada napravljena
+	*/
+
+	int colorSpace();
 };

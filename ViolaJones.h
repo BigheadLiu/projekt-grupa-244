@@ -2,6 +2,7 @@
 #include "Cascade.h"
 #include "Image.h"
 #include "AdaBoost.h"
+#include "ImageLoader.h"
 #include <list>
 using namespace std;
 
@@ -13,31 +14,21 @@ using namespace std;
  */
 class ViolaJones {
 public:
-// TODO: treba sve testirati, iako je kod napisan, niti jedan dio nije testiran!!!
-// TODO: da li da rade direktno s integralnim slikama ili nekakvim pointerima na njih (brze)
-// TODO: implementirati metodu adaBoostTrain()
-
-	vector<Image*> positiveTrain;  // set (integralnih) slika za treniranje koje su pozitivne
-	vector<Image*> negativeTrain;  // set (integralnih) slika za treniranje koje su negativne
-	
 	vector<Image*> positiveTest;  // set (integralnih) slika za testiranje koje su pozitivne
 	vector<Image*> negativeTest;  // set (integralnih) slika za testiranje koje su negativne
-	string negativeTestDirectory;
+	
+	ImageLoader &negativeTestLoader, &positiveTestLoader;
+
 	int minNumber; // minimalni broj negativnih test primjera u jednom trenutku
-	int loadNumber; // broj negativnih test primjera koje ce ucitavati u jednom koraku ukoliko ih ima manje od minNumber
 
 	int clearedNegativeTestSize; // broj negativnih primjera koje je obrisao zbog stednje memorije
-	
-	ViolaJones(void)
-	{
-	}
 	
 	~ViolaJones(void)
 	{
 	}
 	
 	// konstruktor za inicijalizaciju:	
-	ViolaJones(vector<Image*> pte, vector<Image*> nte, string negativeTestDirectory, int minNumber, int loadNumber);
+	ViolaJones(ImageLoader &positiveTestLoader, ImageLoader& negativeTestLoader, int minNumber);
 	
 	/*
 	 * f - the maximum acceptable false positive rate per layer

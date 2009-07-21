@@ -6,17 +6,14 @@ using namespace std;
 #define MAX 1000000000
 #define debug(x) cout << #x << ": " << x << endl;
 
-ViolaJones::ViolaJones(vector<Image*>pte, vector<Image*> nte, string negativeTestDirectory, int minNumber, int loadNumber)
+ViolaJones::ViolaJones(ImageLoader &positiveTestLoader, ImageLoader& negativeTestLoader, int minNumber):negativeTestLoader(negativeTestLoader), positiveTestLoader(positiveTestLoader)
 {
-	//positiveTrain=ptr;
-	//negativeTrain=ntr;
-	positiveTest=pte;
-	negativeTest=nte;
+	positiveTest = positiveTestLoader.loadNextImages();
+	negativeTest = negativeTestLoader.loadNextImages();
+
 	clearedNegativeTestSize = 0;
-	this->negativeTestDirectory = negativeTestDirectory;
 
 	this->minNumber = minNumber;
-	this->loadNumber = loadNumber;
 }
 
 /*
@@ -103,7 +100,7 @@ void ViolaJones::spremiPodatke(Cascade kaskada, int &i, double &lastD, double &l
 }
 
 void ViolaJones::recoverFromError(int &i, double &lastD, double &lastF, vector< Image* > &N) {
-	Cascade kaskada;	
+	Cascade kaskada( ColorSpace::RGB );	//samo default vrijednost, prilikom ucitavanja se ucita prava vrijednost
 	FILE *fin = fopen("podaci.temp", "r");
 		if (fin == NULL) return;
 		cout << "RECOVERING FROM ERROR!!!" << endl;
@@ -165,8 +162,9 @@ void ViolaJones::evaluateOnTrainNegative(vector<Image*> &N, Cascade &kaskada) {
 	}
 
 	negativeTest = N;
-	if (negativeTest.size() < minNumber) {		
-		vector < Image* > tmp = Image::loadAllImagesFromDirectory(negativeTestDirectory, true, loadNumber );
+	if (negativeTest.size() < minNumber) {			
+		vector < Image* > tmp = this->negativeTestLoader.loadNextImages();
+
 		cout << "Ucitao sam nove negativne primjere, njih: " << tmp.size() << endl;
 		if (tmp.size() == 0) return;
 

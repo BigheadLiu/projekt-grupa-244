@@ -41,13 +41,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files\OpenCV\cxcore\include&quot;;&quot;C:\Program Files\OpenCV\cv\include&quot;"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\boost_1_39_0&quot;;&quot;C:\Program Files\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files\OpenCV\cxcore\include&quot;;&quot;C:\Program Files\OpenCV\cv\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
-				WarningLevel="3"
+				WarningLevel="0"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -61,9 +61,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cv.lib cvaux.lib cvhaartraining.lib cxcore.lib cxts.lib highgui.lib"
+				AdditionalDependencies="cv.lib cvaux.lib cvhaartraining.lib cxcore.lib cxts.lib highgui.lib libboost_filesystem-vc90-mt-gd-1_39.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\OpenCV\lib&quot;;&quot;C:\Program Files\OpenCV\bin&quot;"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\boost_1_39_0\stage\lib&quot;;&quot;C:\Program Files\OpenCV\lib&quot;;&quot;C:\Program Files\OpenCV\bin&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -185,6 +185,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ColorSpace.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Feature.cpp"
 				>
 			</File>
@@ -194,6 +198,10 @@
 			</File>
 			<File
 				RelativePath=".\Image.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ImageLoader.cpp"
 				>
 			</File>
 			<File
@@ -221,6 +229,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\testCode.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ViolaJones.cpp"
 				>
 			</File>
@@ -239,6 +251,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ColorSpace.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Feature.h"
 				>
 			</File>
@@ -248,6 +264,10 @@
 			</File>
 			<File
 				RelativePath=".\Image.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ImageLoader.h"
 				>
 			</File>
 			<File
@@ -279,6 +299,10 @@
 		</File>
 		<File
 			RelativePath=".\cascadeout.txt"
+			>
+		</File>
+		<File
+			RelativePath=".\ClassDiagram1.cd"
 			>
 		</File>
 		<File

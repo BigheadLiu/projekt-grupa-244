@@ -1,17 +1,19 @@
+#pragma once
+
 #include <string>
 #include "Cascade.h"
+#include "ColorSpace.h"
 #include <vector> 
 #include <cv.h>
 #include <highgui.h>
 using namespace std;
-
-#pragma once
 
 /**
 * Klasa koja predstavlja jednu sliku (ili za testiranje ili za ucenje )
 * Ima metode za evaluaciju featura i cijele kaskade nad slikom te
 * mogucnost iscrtavanja kvadrata nad oznacenom regijom slike.
 */
+
 
 class Image
 {
@@ -25,7 +27,18 @@ private:
 	void nacrtajTocke( IplImage *slika, vector< pair<int,int> > tocke, float scale, int x, int y, int r=0, int g=0, int b=255 );
 	int *IntegralImage;
 
+	//enum ColorSpace;
+	//ColorSpace colorspace;
+
+	int colorspace; //colorspace koji se koristi... podatak iz klase ColorSpace
+	IplImage* getRgbImage();
+	int NUM_CHANNELS;
 public:
+	//enum ColorSpace {
+	//	HSV, LAB, RGB
+	//}; //pazit prilikom izmjene, promjena poretka znacajno utjece
+	//static int getColorSpaceByName(string name);
+
 	struct Rectangle {
 		int x, y, height, width;
 		Rectangle(int x, int y, int height, int width) {
@@ -42,7 +55,7 @@ public:
 	/**
 	* Konstruktor slike, ucitava sliku iz danog file-a
 	*/
-	Image(string);
+	Image(string, int colorspace = ColorSpace::RGB);
 
 	/*
 	* destruktor slike, brise dinamicki zauzete resurse.
@@ -94,7 +107,7 @@ public:
 	* sa naredbom dir /w > files.txt, te zatim obrisati podatke u zaglavlju.
 	* maxNumber... maksimalan broj slika koje da ucita iz direktorija, default je sve slike
 	*/
-	static vector<Image*> Image::loadAllImagesFromDirectory(string directory, bool limitLoading = false, int maxNumber = -1);
+	//static vector<Image*> Image::loadAllImagesFromDirectory(string directory, bool limitLoading = false, int maxNumber = -1);
 	static int dosadUcitano;
 
 	/**
@@ -145,7 +158,7 @@ public:
 	* Evaluacija cijele kaskade, sluzi za testiranje cjelokupnog algoritma. Na slici oznacava 
 	* regije za koje algoritam kaze da su znakovi	
 	*/
-	vector<Image::Rectangle> evaluateCascade(vector<Cascade>& kaskade, float pocetniScale, float stepScale, float zavrsniScale, int order, float ukupniTreshold);
+	vector<Image::Rectangle> evaluateCascade(vector<Cascade>& kaskade, float pocetniScale, float stepScale, float zavrsniScale, int order, float ukupniTreshold, bool showImages = true);
 	bool Image::evaluateCascadeLevel( int X, int Y, int velicinaProzora, float scale, Cascade &kaskada, int index);	
 	bool postProcess( int x, int y, int velicina );
 	bool evaluateSystem(int i, int j, int velicinaProzora, int trenScale, vector<Cascade>& kaskade, int order, float tresholdUkupno);
