@@ -18,6 +18,7 @@ private:
 
 	static vector<string> names;
 	static int convert[3];
+	static int convertInverse[3];
 
 	ColorSpace() {} //klasa se zbog ovoga ne moze instancirati
 public:
@@ -25,4 +26,5 @@ public:
 	static int getByName(string name);
 	static string getName(int value);
 	static int convertValue(int colorspace); // prilikom prikaza slike treba colorspace pretvoriti u BGR, tome sluzi ova f-ja
+	static int convertValueInverse(int colorspace); // prilikom prikaza slike treba colorspace pretvoriti u BGR, tome sluzi ova f-ja
 };

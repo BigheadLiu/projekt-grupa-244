@@ -67,6 +67,7 @@
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
+				Profile="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -117,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files\OpenCV\cxcore\include&quot;;&quot;C:\Program Files\OpenCV\cv\include&quot;"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\boost_1_39_0&quot;;&quot;C:\Program Files\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files\OpenCV\cxcore\include&quot;;&quot;C:\Program Files\OpenCV\cv\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -138,7 +139,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="cv.lib cvaux.lib cvhaartraining.lib cxcore.lib cxts.lib highgui.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\OpenCV\lib&quot;;&quot;C:\Program Files\OpenCV\bin&quot;"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\boost_1_39_0\stage\lib&quot;;&quot;C:\Program Files\OpenCV\lib&quot;;&quot;C:\Program Files\OpenCV\bin&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -229,10 +230,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\testCode.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ViolaJones.cpp"
 				>
 			</File>
@@ -276,6 +273,10 @@
 			</File>
 			<File
 				RelativePath=".\targetver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\testCode.h"
 				>
 			</File>
 			<File

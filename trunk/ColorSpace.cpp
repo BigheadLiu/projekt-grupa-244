@@ -9,6 +9,7 @@ int ColorSpace::HSV = 0, ColorSpace::LAB = 1, ColorSpace::RGB = 2;
 string namesTmp[] = {"HSV", "LAB", "RGB"};
 vector<string> ColorSpace::names( namesTmp, namesTmp + 3 );
 int ColorSpace::convert[] = {CV_HSV2BGR, CV_Lab2BGR, -1 };
+int ColorSpace::convertInverse[] = {CV_BGR2HSV, CV_BGR2Lab, -1 };
 
 string ColorSpace::getName(int value) {
 	return names[value];
@@ -22,4 +23,9 @@ int ColorSpace::getByName(std::string name) {
 int ColorSpace::convertValue(int colorspace) {
 	assert( colorspace < 3);
 	return convert[ colorspace ];
+}
+
+int ColorSpace::convertValueInverse(int colorspace) {
+	assert( colorspace < 3);
+	return convertInverse[ colorspace ];
 }

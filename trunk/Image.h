@@ -128,6 +128,10 @@ public:
 	* ispisuje podatke o testiranju
 	*/
 	static void writeTestData();
+	/*
+	* Brise podatke o testiranju
+	*/
+	static void clearTestData();
 
 	/*
 	* Trazi sve znakove na zadanoj slici. Vraca vector< Rectangle > koji obiljezava sva moguca pojavljivanja znaka na slici	
