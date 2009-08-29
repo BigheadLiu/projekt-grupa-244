@@ -27,7 +27,7 @@ void Cascade::saveCascade(string file)
 	
 	vector<Feature> &bf=Feature::allBaseFeatures;
 	
-	fprintf(out,"%d %s\n",bf.size(), ColorSpace::getName( colorspace ) );
+	fprintf(out,"%d %s\n",bf.size(), ColorSpace::getName( colorspace ).c_str() );
 	
 	for(int n,j,i=0;i<bf.size();i++) {
 		fprintf(out,"%d %d\n",bf[i].width,bf[i].height);

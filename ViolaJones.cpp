@@ -37,7 +37,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 	
 	pair<double,double> tmpRet;  // pomocna varijabla
 
-	recoverFromError(i, lastD, lastF,N ); // oporavak od greske u slucaju ako je prethodni postupak ucenja prekinut greskom na racunalu
+	//recoverFromError(i, lastD, lastF,N ); // oporavak od greske u slucaju ako je prethodni postupak ucenja prekinut greskom na racunalu
 
 	while(tmpF>targetF) {
 		cout << "nivo kaskade: " << i+2 << ". "<< " Broj znakova: " << P.size() << " " << "Broj ne znakova: " << N.size() << " " << endl;
@@ -106,6 +106,7 @@ void ViolaJones::recoverFromError(int &i, double &lastD, double &lastF, vector< 
 		cout << "RECOVERING FROM ERROR!!!" << endl;
 		fscanf(fin, "%lf %lf %d", &lastD, &lastF, &i);
 	fclose(fin);	
+	i--; //nisam siguran da je ovo potrebno
 	kaskada.loadCascade("temp.cascade");
 	N.clear();
 	evaluateOnTrainNegative( N, kaskada);

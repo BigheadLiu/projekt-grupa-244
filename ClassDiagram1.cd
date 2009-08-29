@@ -1,1 +1,60 @@
- 
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AdaBoost" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAAAAAAAADgAAAAABAAAAAAAEAAAA=</HashCode>
+      <FileName>AdaBoost.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Cascade" Collapsed="true">
+    <Position X="3" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAIAAIAQAAAAAAAAAACgAgAAAAIAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>Cascade.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ColorSpace" Collapsed="true">
+    <Position X="5.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAoAAACAgAAAAAAAAAAAABAAAAAAAAAECAAAAIg=</HashCode>
+      <FileName>ColorSpace.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Feature" Collapsed="true">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAkgAAAAAAAAKAQAQAAAAAACAgDAAAAgACBgCAQCAAA=</HashCode>
+      <FileName>Feature.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GuiCommunication" Collapsed="true">
+    <Position X="3" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAIAAAAAAAiIAAIgQEABAhAJGICCAAAABAIAAAAAAAA=</HashCode>
+      <FileName>GuiCommunication.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ViolaJones" Collapsed="true">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABQAIACAAQBAEAEEAAAAAAAAQAIAQAACAAIAAAEAACA=</HashCode>
+      <FileName>ViolaJones.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Image" Collapsed="true">
+    <Position X="3" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QQACFJQAAAgAgCgAgACkCAoAEAgEQBIAAAAAAAAIAAQ=</HashCode>
+      <FileName>Image.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ImageLoader" Collapsed="true">
+    <Position X="5.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAACSAAAABAACAACAEAAAAAIACAAAAAAAAAAA=</HashCode>
+      <FileName>ImageLoader.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

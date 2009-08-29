@@ -28,12 +28,11 @@ Image::Image(string fileName, int colorspace )
 
 	this->colorspace = colorspace;
 	if (colorspace != ColorSpace::RGB) { //nakon ovog bloka slika je u colorspace-u kojeg zelim
-		IplImage *image2 = cvCreateImage( cvSize( image->width, image->height), image->depth, image->nChannels );
-		int convert[] = { CV_BGR2HSV, CV_BGR2Lab };
+		IplImage *image2 = cvCreateImage( cvSize( image->width, image->height), image->depth, image->nChannels );		
 
-		cvCvtColor( image, image2, convert[ colorspace ] );
+		cvCvtColor( image, image2, ColorSpace::convertValueInverse(colorspace) );
 		cvCopyImage( image2, image );
-
+		
 		cvReleaseImage( &image2 );
 	} 
 
@@ -173,14 +172,16 @@ int Image::evaluateBaseFeature(const Feature &F, int X, int Y, bool ispisi, floa
 	int y = F.y;	
 			
 	for(int i=0; i<F.add.size(); i++) {
+		//for( vector< pair<int,int> >::const_iterator iter = F.add.begin(); iter != F.add.end(); iter ++ ) {
 		int a = (int)((x + F.add[i].first * F.scale) * scale + X);
-		int b = (int)((y + F.add[i].second * F.scale) * scale + Y);		
+		int b = (int)((y + F.add[i].second * F.scale) * scale + Y);			
 
 		if (a >= getHeight() || b >= getWidth() ) return -INF;				
 		rj += IntegralImage( a, b, F.channel);
 	}
 	
 	for(int j=0; j<F.subtract.size(); j++) {
+		//for( vector< pair<int,int> >::const_iterator iter = F.subtract.begin(); iter != F.subtract.end(); iter ++ ) {
 		int a = (int)((x + F.subtract[j].first * F.scale) * scale + X);
 		int b = (int)((y + F.subtract[j].second * F.scale) * scale + Y);
 
@@ -527,6 +528,10 @@ void Image::writeTestData() {
 	cout << "Ukupan broj prozora za trazenje: " << Image::ukupnoEvaluirano << endl;
 	cout << "Ukupan broj pronadenih znakova: " << Image::ukupnoEvaluiranoTrue << endl;
 	cout << "Ukupan broj isjecaka koji su proglaseni ne-znakovima: " << Image::ukupnoEvaluiranoFalse << endl;
+}
+
+void Image::clearTestData() {
+	ukupnoEvaluirano = ukupnoEvaluiranoTrue =ukupnoEvaluiranoFalse = 0;
 }
 
 
