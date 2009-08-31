@@ -105,13 +105,17 @@ vector<Cascade> GuiCommunication::getCascade() {
 
 Image* GuiCommunication::getNextImage() {	
 	if (brojac >= images.size()) return NULL;
-	Image *slika = new Image( images[ brojac ] );	
+	Image *slika = new Image( images[ brojac ], getColorSpace() );	
 	GuiCommunication::brojac ++;
 	return slika;
 }
 
 float GuiCommunication::getPocetniScale() {
 	return 1.;
+}
+
+int GuiCommunication::getColorSpace() {
+	return ColorSpace::RGB;
 }
 
 float GuiCommunication::getZavrsniScale() {

@@ -3,6 +3,13 @@
 #pragma once
 using namespace std;
 
+/*
+* Trenutno postoji problem sa colorspace-ovim.
+* Koristi se samo RGB colorspace. 
+* Postoji problem ukoliko se koriste kaskade s razlicitim colorspace-ovima.
+* Jer onda je potrebno vrsiti konverziju slike u druge prostore boja.
+*
+*/
 class GuiCommunication
 {
 	static string file;
@@ -31,4 +38,5 @@ public:
 	static float getZavrsniScale();
 	static int GuiCommunication::getIsSlijedno();
 	static float GuiCommunication::getTreshold();
+	static int getColorSpace(); //treba napraviti izmjenu ukoliko je potrebna izmjena colorspace-a unutar GUI-a
 };

@@ -22,20 +22,20 @@ Image::Image(string fileName, int colorspace )
 	Image::ukupanBroj ++;
 	image = cvLoadImage( fileName.c_str() );		
 
-	NUM_CHANNELS = image->nChannels;
-
 	if (image == NULL) cout << "Nisam uspio ucitati sliku";
 
 	this->colorspace = colorspace;
 	if (colorspace != ColorSpace::RGB) { //nakon ovog bloka slika je u colorspace-u kojeg zelim
-		IplImage *image2 = cvCreateImage( cvSize( image->width, image->height), image->depth, image->nChannels );		
-
+		IplImage *image2 = cvCreateImage( cvSize( image->width, image->height), image->depth, ColorSpace::getNChannels(colorspace) );		
+	
 		cvCvtColor( image, image2, ColorSpace::convertValueInverse(colorspace) );
-		cvCopyImage( image2, image );
+		//cvCopyImage( image2, image );
+		swap( image, image2 );
 		
 		cvReleaseImage( &image2 );
 	} 
 
+	NUM_CHANNELS = image->nChannels;
 	IntegralImage =(int *) malloc( sizeof(int) * image->height * image->width * NUM_CHANNELS );
 
 	int *stupac = (int *) malloc( sizeof(int) * image->height * image->width * NUM_CHANNELS );
@@ -70,12 +70,6 @@ Image::~Image(void)
 	free(IntegralImage);
 }
 
-//int Image::getColorSpaceByName(std::string name) {
-//	string imena[] = { "HSV", "LAB", "RGB" };
-//	for(int i=0; i<3; i++)
-//		if (imena[i] == name) return i;
-//}
-
 string Image::imageData() {
 	char rj[100];
 	sprintf(rj, "Velicina: (%d,%d)\nChannels: %d\nInterleaved: %d\nDepth: %d\n", 
@@ -93,7 +87,7 @@ int Image::getWidth(void) {
 }
 
 IplImage* Image::getRgbImage() {
-	IplImage *tmpSlika = cvCreateImage( cvSize( image->width, image->height), image->depth, image->nChannels );
+	IplImage *tmpSlika = cvCreateImage( cvSize( image->width, image->height), image->depth, ColorSpace::getNChannels(ColorSpace::RGB) );
 	int convert = ColorSpace::convertValue( colorspace );
 
 	if ( convert != -1 ) //nakon ovog bloka slika je u RGB colorspace-u
@@ -172,7 +166,6 @@ int Image::evaluateBaseFeature(const Feature &F, int X, int Y, bool ispisi, floa
 	int y = F.y;	
 			
 	for(int i=0; i<F.add.size(); i++) {
-		//for( vector< pair<int,int> >::const_iterator iter = F.add.begin(); iter != F.add.end(); iter ++ ) {
 		int a = (int)((x + F.add[i].first * F.scale) * scale + X);
 		int b = (int)((y + F.add[i].second * F.scale) * scale + Y);			
 
@@ -181,7 +174,6 @@ int Image::evaluateBaseFeature(const Feature &F, int X, int Y, bool ispisi, floa
 	}
 	
 	for(int j=0; j<F.subtract.size(); j++) {
-		//for( vector< pair<int,int> >::const_iterator iter = F.subtract.begin(); iter != F.subtract.end(); iter ++ ) {
 		int a = (int)((x + F.subtract[j].first * F.scale) * scale + X);
 		int b = (int)((y + F.subtract[j].second * F.scale) * scale + Y);
 
@@ -217,29 +209,6 @@ void Image::nacrtajTocke( IplImage *slika, vector < pair<int,int> > tocke, float
 			}
 	}
 }
-
-/*vector<Image*> Image::loadAllImagesFromDirectory(string dir, bool limitLoading, int maxNumber) {
-	int brojac = 0;
-	string file = dir + "\\files.txt";
-	vector < Image* > rjesenje;
-	char ime[100];
-
-	FILE *fin = fopen(file.c_str(), "r");
-	while( fscanf(fin, "%s", ime) == 1) {
-		string tmp = dir + "\\" + string( ime );
-
-		brojac ++;
-		if (brojac <= dosadUcitano && limitLoading == true) continue;
-		rjesenje.push_back( new Image( tmp ) );
-		
-		if (rjesenje.size() > maxNumber && limitLoading == true) break;
-	}
-	if (limitLoading == true) dosadUcitano = brojac + 1;
-
-	fclose(fin);
-
-	return rjesenje;
-}*/
 
 void Image::evaluirajLevel( vector< Feature > features ) {
 	float trenScale = 1;
@@ -407,8 +376,10 @@ vector<Image::Rectangle> Image::evaluateCascade(vector<Cascade>& kaskade, float 
 					brTrue ++;
 					this->ukupnoEvaluiranoTrue++;
 
-					if (showImages == true) 
-						nacrtajOkvir( image, i, j, velicinaProzora, 0, 0, 255 );
+					if (showImages == true) {
+						CvScalar &boja = ColorSpace::getMarkerColor( this->colorspace );
+						nacrtajOkvir( image, i, j, velicinaProzora, boja.val[0], boja.val[1], boja.val[2] );
+					}
 
 					rjesenje.push_back( Rectangle(i, j, velicinaProzora, velicinaProzora ) );
 #ifdef SHOW_FEATURE 

@@ -72,7 +72,8 @@ vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative
 	int brNegative = min( positive.size(), negative.size() );
 
 	vector< float > weightPositive, weightNegative;
-	vector < Feature > dobriFeaturi;
+	//vector < Feature > dobriFeaturi;
+	vector< bool > validFeature;
 	vector <Feature> rjesenje;
 
 	debug2( positive.size() );
@@ -113,11 +114,12 @@ vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative
 			tmp.push_back( triple(j, val, false) );
 		}
 
-		if ( broken == true ) { //ako feature nije ispravan sve vrijednosti postavi na random, to ce ka iskljucit iz odabira
+		if ( broken == true ) { //ako feature nije ispravan sve vrijednosti postavi na random, to ce ka iskljucit iz odabira			
 			for(int i=0; i<tmp.size(); i++)
 				tmp[i].value = rand() % 100;			
 		}
 
+		validFeature.push_back( !broken );
 		featureValue.push_back( tmp );
 		sort( featureValue.back().begin(), featureValue.back().end() );
 	}
@@ -132,6 +134,8 @@ vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative
 		//select best weak classifier
 
 		for(int j=0; j<featureValue.size(); j++) {
+			if (validFeature[j] == false) continue; //provjerit je li feature ispravan
+
 			//odredi <T+, T->
 			pair< float, float > total = make_pair( sumWeight( weightPositive ), sumWeight( weightNegative ));
 
@@ -150,10 +154,11 @@ vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative
 				if (featureValue[j][k].positive == true)  curr.first += weightPositive[ index ];
 				else									  curr.second += weightNegative[ index ];
 
-				
+				if (k != 0 && featureValue[j][k-1].value == featureValue[j][k].value) continue; //sluzi da nije moguce postaviti granicu izmedu istih vrijednosti. Jako vazan uvjet!
+
 				if (curErr < error) {
 					if (k == 0) treshold = featureValue[j][k].value;
-					else treshold = (featureValue[j][k-1].value + featureValue[j][k].value) / 2;
+					else treshold = ( featureValue[j][k-1].value + featureValue[j][k].value) / 2.;
 
 					if (val1 < val2) p = -1;
 					else p = 1;
@@ -197,8 +202,6 @@ vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative
 			rjesenje.back().usporedba = p;
 			break;
 		}
-		
-
 	}
 	#ifndef NODEBUG
 		cout << endl;
@@ -222,7 +225,7 @@ void AdaBoost::normalizeWeights( vector< float > &weightPositive, vector<float> 
 	}
 }
 
-float AdaBoost::sumWeight( vector< float > weight) {
+float AdaBoost::sumWeight( const vector< float > &weight) {
 	float rj = 0;
 	for(int i=0; i<weight.size(); i++) rj += weight[i];
 	return rj;

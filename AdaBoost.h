@@ -30,7 +30,7 @@ private:
 		triple() { value = 0; index = 0; positive= 0; }
 	};
 
-	static float sumWeight( vector< float > weight);
+	static float sumWeight( const vector< float > &weight);
 	static void AdaBoost::normalizeWeights( vector< float > &weightPositive, vector<float> &weightNegative);
 
 	static vector<Feature> train(vector<Image*>&positive, vector<Image*>&negative, vector< Feature > &features, int T);

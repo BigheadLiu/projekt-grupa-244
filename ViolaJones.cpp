@@ -37,7 +37,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 	
 	pair<double,double> tmpRet;  // pomocna varijabla
 
-	//recoverFromError(i, lastD, lastF,N ); // oporavak od greske u slucaju ako je prethodni postupak ucenja prekinut greskom na racunalu
+	recoverFromError(i, lastD, lastF,N ); // oporavak od greske u slucaju ako je prethodni postupak ucenja prekinut greskom na racunalu
 
 	while(tmpF>targetF) {
 		cout << "nivo kaskade: " << i+2 << ". "<< " Broj znakova: " << P.size() << " " << "Broj ne znakova: " << N.size() << " " << endl;
@@ -47,7 +47,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 				
 		kaskada.cascade.push_back( vector<Feature>(0) ); // dodajem prazan vektor na kraj da napravim mjesto za sljedeci level kaskade
 		while(tmpF>f*lastF) {
-			n+=80;
+			n+=15; //koliko feature-a treba dodavat( idealno samo jedan, ali to je sporo )
 			cout << "broj featura: " << n << " false positive: " << tmpF << " " << "trazimo: " << targetF << endl;
 			//cout << n << endl;
 
@@ -103,7 +103,15 @@ void ViolaJones::recoverFromError(int &i, double &lastD, double &lastF, vector< 
 	Cascade kaskada( ColorSpace::RGB );	//samo default vrijednost, prilikom ucitavanja se ucita prava vrijednost
 	FILE *fin = fopen("podaci.temp", "r");
 		if (fin == NULL) return;
-		cout << "RECOVERING FROM ERROR!!!" << endl;
+		cout << "RECOVERING FROM ERROR!!! [Y=yes, N=no]" << endl;
+		string odabir; cin >> odabir;
+		if( string("Yy").find(odabir) != string::npos) cout << endl << "Yes" << endl;
+		else {
+			cout << "No" << endl;
+			fclose(fin);
+			return;
+		}
+
 		fscanf(fin, "%lf %lf %d", &lastD, &lastF, &i);
 	fclose(fin);	
 	i--; //nisam siguran da je ovo potrebno
@@ -200,8 +208,6 @@ void ViolaJones::decraseThreshold(int ith, double minD, Cascade &kaskada) {
 		corrP=0;
 		for(int i=0;i<positiveTest.size();i++)
 			if(evaluate(positiveTest[i],kaskada)) corrP++;
-
-		//tmpD=errP/(double)negativeTest.size(); >??????????????????????? ili positiveTest
 		
 		tmpD=corrP/(double)positiveTest.size(); 				
 

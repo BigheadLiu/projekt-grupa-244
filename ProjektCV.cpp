@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <sstream>
 #include "ColorSpace.h"
 #include "GuiCommunication.h"
 #include "AdaBoost.h"
@@ -9,7 +10,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "ImageLoader.h"
-#include "testCode.h" //kod koji sluzi za testiranje
+#include "testCode.h" //kod koji sluzi za testiranje implementiranih razreda
 
 using namespace std;
 
@@ -41,13 +42,28 @@ void testViolaJones(int colorspace) {
 
 	int tmpChans[] = {0, 1, 2}; //kanali slike za koje se generiraju featuri (za LAB mozda bi bilo dobro izbacit L kanal)
 	vector< int > channels(tmpChans, tmpChans + 3 );
+
+	if (colorspace == ColorSpace::GRAY) { //ukoliko je GRAY onda samo nulti kanal uzmi
+		channels.clear(); channels.push_back( 0 );
+	}
+
+	double falsePositivePerLayer = 0.02, truePositivePerLayer = 0.99;
+	double falsePositive = 0.00001;
+
+	//ostream os( cout );
 	Feature::generateAll(24, 24, 2, 1.3f, channels);
+	cout << "VIOLA JONES..." << endl << "ColorSpace = " + ColorSpace::getName(colorspace) << endl;
+	cout << "Broj featura: " << Feature::generatedFeatures.size() << ", Channels: ";
+	for(int i=0; i<channels.size(); i++) cout << channels[i] << ",";
+	cout << endl;
+	cout << "False positive per layer: " << falsePositivePerLayer << ", False positive: " << falsePositive << endl;
+	cout << "True positive per layer: " << truePositivePerLayer << endl;
 
 	Cascade kaskada(colorspace);
 
 	ViolaJones kuso( loaderTrue, loaderFalse, 1000 );
 	//kuso.buildCascade( 0.1, 0.999, 0.000001, kaskada ); //tesko za izgradit ovakvu kaskadu
-	kuso.buildCascade( 0.02, 0.99, 0.0001, kaskada ); //sad je lagana, valjda
+	kuso.buildCascade( falsePositivePerLayer, truePositivePerLayer, falsePositive, kaskada ); 
 
 	kaskada.saveCascade("KaskadaTest.cascade" );
 	testirajKaskadu( kaskada );
@@ -75,15 +91,12 @@ void testCommunicationWithGui() {
 int _tmain(int argc, _TCHAR* argv[])
 {	
 	//testCode::testColorSpace();
-	//testCode::testLoader(ColorSpace::RGB);
+	//testCode::testLoader(ColorSpace::GRAY);
 
-	//testViolaJones(ColorSpace::RGB);
-	testViolaJonesLoadFromFile("KaskadaTest.cascade");
+	testViolaJones(ColorSpace::RGB);
+	//testViolaJonesLoadFromFile("KaskadaTest.cascade");
 	//testViolaJonesLoadFromFile("temp.cascade");
 	//testCommunicationWithGui();
 
 	return 0;
 }
-
-// pokrenit ucenje u LAB sustavu boja ali ne tako naglo(tj ne odjenom dodavat 80 feature-a)
-// mozda se zbog toga javlja problem prilikom ucenja.

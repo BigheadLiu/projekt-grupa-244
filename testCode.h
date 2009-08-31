@@ -34,14 +34,17 @@ void testLoader(int colorspace) {
 	system("pause");
 }
 
+
 void testColorSpace() {
 	assert( ColorSpace::HSV == ColorSpace::getByName("HSV") );
 	assert( ColorSpace::LAB == ColorSpace::getByName("LAB") );
 	assert( ColorSpace::RGB == ColorSpace::getByName("RGB") );
+	assert( ColorSpace::GRAY == ColorSpace::getByName("GRAY") );
 
-	cout << ColorSpace::getName( ColorSpace::HSV ) << endl;
-	cout << ColorSpace::getName( ColorSpace::LAB ) << endl;
-	cout << ColorSpace::getName( ColorSpace::RGB ) << endl;
+	assert( ColorSpace::getName( ColorSpace::HSV) == "HSV");
+	assert( ColorSpace::getName( ColorSpace::LAB) == "LAB");
+	assert( ColorSpace::getName( ColorSpace::RGB) == "RGB");
+	assert( ColorSpace::getName( ColorSpace::GRAY) == "GRAY");
 
 	system("pause");
 }
