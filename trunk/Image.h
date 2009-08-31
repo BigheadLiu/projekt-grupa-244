@@ -27,18 +27,10 @@ private:
 	void nacrtajTocke( IplImage *slika, vector< pair<int,int> > tocke, float scale, int x, int y, int r=0, int g=0, int b=255 );
 	int *IntegralImage;
 
-	//enum ColorSpace;
-	//ColorSpace colorspace;
-
 	int colorspace; //colorspace koji se koristi... podatak iz klase ColorSpace
 	IplImage* getRgbImage();
 	int NUM_CHANNELS;
 public:
-	//enum ColorSpace {
-	//	HSV, LAB, RGB
-	//}; //pazit prilikom izmjene, promjena poretka znacajno utjece
-	//static int getColorSpaceByName(string name);
-
 	struct Rectangle {
 		int x, y, height, width;
 		Rectangle(int x, int y, int height, int width) {
@@ -55,7 +47,7 @@ public:
 	/**
 	* Konstruktor slike, ucitava sliku iz danog file-a
 	*/
-	Image(string, int colorspace = ColorSpace::RGB);
+	Image(string, int colorspace);
 
 	/*
 	* destruktor slike, brise dinamicki zauzete resurse.
