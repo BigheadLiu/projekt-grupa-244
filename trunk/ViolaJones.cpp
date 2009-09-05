@@ -64,6 +64,7 @@ void ViolaJones::buildCascade(double f,double d, double targetF,Cascade &kaskada
 			decraseThreshold(i,d*lastD,kaskada);	
 
 			// Evaluate current cascaded classifier on validation set to determine tmpF and tmpD:
+			// ne postoji validation set
 			tmpRet=evaluateOnTest(kaskada);
 			
 			tmpF=tmpRet.first;

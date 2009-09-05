@@ -7,11 +7,48 @@
 #include "Feature.h"
 #include <vector>
 #include <iostream>
+#include "BigVector.h"
 using namespace std;
 
 namespace testCode {
+
+	void testBigVector() {
+		int broj = 1000000;
+		BigVector< int > big(broj);
+		vector< int > v;
+
+		for(int i=0; i<broj; i++) {
+			int value = rand() % 1000;
+			v.push_back( value );
+			big.push_back( value );
+			assert( big.back() == v.back() );
+		}
+
+		for(int i=0; i<broj; i++) {
+			int value = rand() % 1000;
+			int gdje = rand() % v.size();
+			v[gdje] = value;
+			big[gdje] = value;
+		}
+
+
+		//sort(big.begin(), big.end() );
+
+		for(int i=0; i<broj; i++)
+			assert( v[i] == big[i] );		
+
+		for(int i=0; i<broj; i++) {
+			int value = rand();
+			assert( v[ value % v.size() ] == big[ value % big.size() ] );
+		}
+
+		cout << "GOTOVO" << endl;
+		//system("pause");
+
+	}
+
 void testLoader(int colorspace) {
-	ImageLoader loader("c:\\images\\", colorspace, true, 1, true);
+	DirectoryLoader loader("c:\\images\\", colorspace, true, 1, true);
 	vector< Image* > rj = loader.loadNextImages();
 	cout << "-----------" << endl;
 	 rj = loader.loadNextImages();
@@ -34,6 +71,41 @@ void testLoader(int colorspace) {
 	system("pause");
 }
 
+void testNegativeLoader() {
+	NegativeTestLoader loader("c:\\Images\\test", ColorSpace::LAB, true, 2000, false);
+
+	int ukupno = 0;
+	while(true) {
+		vector< Image* > slika = loader.loadNextImages();
+		ukupno += slika.size();
+		if (slika.size() == 0) break;
+		
+	for(int i=0; i<slika.size(); i++)
+		delete slika[i];
+
+		cout << "Ucitao sam: " << slika.size() << " slika." << endl;
+	}
+
+	cout << "Ukupno ih ima: " << ukupno << endl;
+	system("pause");
+}
+
+void testMultipleLoader() {
+	DirectoryLoader loader("c:\\Images\\true", ColorSpace::LAB, true, 10, true );
+	DirectoryLoader loader2("c:\\Images\\true2", ColorSpace::LAB, true, 10, true );
+	MultipleDirectoryLoader multiple( loader, loader2 );
+
+	long long ukupno = 0;
+	while(true) {
+		vector< Image* > slika = multiple.loadNextImages();
+		ukupno += slika.size();
+		if (slika.size() == 0) break;
+		cout << "Ucitao sam: " << slika.size() << " slika." << endl;
+	}
+
+	cout << "Ukupno ih ima: " << ukupno << endl;
+	system("pause");
+}
 
 void testColorSpace() {
 	assert( ColorSpace::HSV == ColorSpace::getByName("HSV") );
@@ -78,9 +150,9 @@ void writeFeatures(vector <Feature> tmp ) {
 
 
 void testAdaBoost(int colorspace) {
-	ImageLoader loaderTrue("c:\\Images\\true", colorspace);
-	ImageLoader loaderFalse("c:\\Images\\false", colorspace);
-	ImageLoader loaderTest("c:\\Images\\test", colorspace);
+	DirectoryLoader loaderTrue("c:\\Images\\true", colorspace);
+	DirectoryLoader loaderFalse("c:\\Images\\false", colorspace);
+	DirectoryLoader loaderTest("c:\\Images\\test", colorspace);
 
 	vector< Image* > slikeTrue = loaderTrue.loadNextImages();
 	vector< Image* > slikeFalse= loaderFalse.loadNextImages();

@@ -17,13 +17,8 @@ using namespace std;
 #define INF INT_MAX / 2
 #define debug(x) cout << #x << ": " << x << endl;
 
-Image::Image(string fileName, int colorspace ) 
-{		
-	Image::ukupanBroj ++;
-	image = cvLoadImage( fileName.c_str() );		
-
-	if (image == NULL) cout << "Nisam uspio ucitati sliku";
-
+void Image::createIntegralImage(IplImage* slika, int colorspace) {
+	image = slika;
 	this->colorspace = colorspace;
 	if (colorspace != ColorSpace::RGB) { //nakon ovog bloka slika je u colorspace-u kojeg zelim
 		IplImage *image2 = cvCreateImage( cvSize( image->width, image->height), image->depth, ColorSpace::getNChannels(colorspace) );		
@@ -62,6 +57,20 @@ Image::Image(string fileName, int colorspace )
 				IntegralImage(i,j, c) = IntegralImage(i, j-1, c) + stupac(i,j, c);
 
 	free( stupac );	
+
+}
+
+Image::Image(IplImage *slika, int colorspace) {
+	createIntegralImage( slika, colorspace );
+}
+
+Image::Image(string fileName, int colorspace ) 
+{		
+	Image::ukupanBroj ++;
+	image = cvLoadImage( fileName.c_str() );		
+
+	if (image == NULL) cout << "Nisam uspio ucitati sliku";
+	createIntegralImage( image, colorspace );
 }
 
 Image::~Image(void)
@@ -100,11 +109,11 @@ IplImage* Image::getRgbImage() {
 }
 
 void Image::showImage(void) {
-	const int minVelicina = 100;
+	const int minVelicina = 150;
 	cvNamedWindow("PRIKAZ SLIKA", CV_WINDOW_AUTOSIZE);
 	IplImage* imageRGB = getRgbImage();
 
-	if ( min(imageRGB->height, imageRGB->width) < minVelicina) { //povecaj sliku za bolji pogled
+	if (  min(imageRGB->height, imageRGB->width) < minVelicina) { //povecaj sliku za bolji pogled
 		int h = imageRGB->height * minVelicina / min(imageRGB->height, imageRGB->width);
 		int w = imageRGB->width * minVelicina / min(imageRGB->height, imageRGB->width);
 		IplImage *tmpSlika = cvCreateImage( cvSize(h, w), imageRGB->depth, imageRGB->nChannels);
@@ -225,8 +234,6 @@ void Image::evaluirajLevel( vector< Feature > features ) {
 
 
 	for(;trenScale<10; trenScale *= stepScale) {	
-	//{ trenScale = 8;
- 		//int velicinaSkoka = ( trenScale + 1 ) * 4;
 		int velicinaSkoka = trenScale * 2;
 		int velicinaProzora = trenScale * 20;
 		int brFalse = 0, brTrue = 0;

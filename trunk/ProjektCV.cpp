@@ -5,6 +5,7 @@
 #include "AdaBoost.h"
 #include "Cascade.h"
 #include "ViolaJones.h"
+#include <fstream>
 #include "Image.h"
 #include <cstdio>
 #include <cstdlib>
@@ -19,7 +20,7 @@ using namespace std;
 */
 
 void testirajKaskadu( Cascade &kaskada ) {
-	ImageLoader loaderTest("c:\\Images\\test", kaskada.colorSpace(), true, 1, false );
+	DirectoryLoader loaderTest("c:\\Images\\test", kaskada.colorSpace(), true, 1, false );
 	vector< Image * > testSlike = loaderTest.loadNextImages();
 
 	vector < Cascade > kaskade;
@@ -35,8 +36,10 @@ void testirajKaskadu( Cascade &kaskada ) {
 }
 
 void testViolaJones(int colorspace) {
-	ImageLoader loaderTrue("c:\\Images\\true", colorspace);
-	ImageLoader loaderFalse("c:\\Dokumenti\\Nastava - FER\\Projekt\\ProjektCV - kalafatic\\Images\\false", colorspace, true, 2000, true); //ucitava ih rekurzivno tako da ih je moguce stavit u vise direktorija
+	DirectoryLoader loaderTrue("c:\\Images\\true", colorspace);
+	DirectoryLoader loaderFalse("c:\\Dokumenti\\Nastava - FER\\Projekt\\ProjektCV - kalafatic\\Images\\false", colorspace, true, 1000, true); //ucitava ih rekurzivno tako da ih je moguce stavit u vise direktorija
+	DirectoryLoader loaderFalse2("c:\\Dokumenti\\Nastava - FER\\Projekt\\ProjektCV - kalafatic\\Images\\false2", colorspace, true, 1000, true); //ucitava ih rekurzivno tako da ih je moguce stavit u vise direktorija
+	MultipleDirectoryLoader loaderFalseMultiple( loaderFalse, loaderFalse2 ); // ucitavanje slika iz vise direktorija
 
 	Feature::loadBaseFeatures("basefeatures.txt");
 
@@ -47,10 +50,10 @@ void testViolaJones(int colorspace) {
 		channels.clear(); channels.push_back( 0 );
 	}
 
-	double falsePositivePerLayer = 0.02, truePositivePerLayer = 0.99;
+	double falsePositivePerLayer = 0.005, truePositivePerLayer = 0.999;
 	double falsePositive = 0.00001;
 
-	//ostream os( cout );
+	//ispis podataka na ekran
 	Feature::generateAll(24, 24, 2, 1.3f, channels);
 	cout << "VIOLA JONES..." << endl << "ColorSpace = " + ColorSpace::getName(colorspace) << endl;
 	cout << "Broj featura: " << Feature::generatedFeatures.size() << ", Channels: ";
@@ -61,7 +64,7 @@ void testViolaJones(int colorspace) {
 
 	Cascade kaskada(colorspace);
 
-	ViolaJones kuso( loaderTrue, loaderFalse, 1000 );
+	ViolaJones kuso( loaderTrue, loaderFalseMultiple, 1000 );
 	//kuso.buildCascade( 0.1, 0.999, 0.000001, kaskada ); //tesko za izgradit ovakvu kaskadu
 	kuso.buildCascade( falsePositivePerLayer, truePositivePerLayer, falsePositive, kaskada ); 
 
@@ -88,15 +91,39 @@ void testCommunicationWithGui() {
 	GuiCommunication::sendResults();
 }
 
+//#define REDIRECT
+
 int _tmain(int argc, _TCHAR* argv[])
 {	
 	//testCode::testColorSpace();
 	//testCode::testLoader(ColorSpace::GRAY);
+	//testCode::testMultipleLoader();
+	//testCode::testNegativeLoader();
+	//for(int i=0; i<10; i++)
+	//	testCode::testBigVector();
+	//return 0;
 
-	testViolaJones(ColorSpace::RGB);
+	//redirect output to file(for log files)
+#ifdef REDIRECT
+	std::streambuf* cout_sbuf = std::cout.rdbuf(); // save original sbuf
+	ofstream fout("podaci.log");	
+    std::cout.rdbuf(fout.rdbuf()); // redirect 'cout' to a 'fout'    
+#endif
+
+	testViolaJones(ColorSpace::LAB);
 	//testViolaJonesLoadFromFile("KaskadaTest.cascade");
 	//testViolaJonesLoadFromFile("temp.cascade");
 	//testCommunicationWithGui();
 
+#ifdef REDIRECT
+	fout.close();
+#endif
 	return 0;
 }
+
+//TODO: ne postoji validation set za testiranje nego
+//		se to radi pomocu slika s kojima je izvodeno ucenje(tog levela kaskade)
+//		zato je nekad problem sa ucenjem visih levela kaskade.
+
+//		ispravit bug sa bigVector-om, nakon sto je gotov sa generiranjem svih feature-a onda se srusi
+//		moguce da je problem u destruktoru
