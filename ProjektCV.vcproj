@@ -182,6 +182,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BigVector.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Cascade.cpp"
 				>
 			</File>
@@ -241,6 +245,10 @@
 			>
 			<File
 				RelativePath=".\AdaBoost.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BigVector.h"
 				>
 			</File>
 			<File

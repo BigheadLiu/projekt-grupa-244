@@ -30,6 +30,8 @@ private:
 	int colorspace; //colorspace koji se koristi... podatak iz klase ColorSpace
 	IplImage* getRgbImage();
 	int NUM_CHANNELS;
+
+	void createIntegralImage(IplImage *slika, int colorspace);
 public:
 	struct Rectangle {
 		int x, y, height, width;
@@ -48,6 +50,8 @@ public:
 	* Konstruktor slike, ucitava sliku iz danog file-a
 	*/
 	Image(string, int colorspace);
+
+	Image(IplImage *slika, int colorspace);
 
 	/*
 	* destruktor slike, brise dinamicki zauzete resurse.
@@ -137,6 +141,8 @@ public:
 	string imageData();
 	int getHeight();
 	int getWidth();	
+	int channels() {return image->nChannels;}
+	int depth() {return image->depth;}
 
 	/*
 	* Evaluira Feature na danom slikom, uracunava i njegov weight koji je prije izracunat pomocu AdaBoost-a

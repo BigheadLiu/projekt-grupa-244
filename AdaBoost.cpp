@@ -6,6 +6,8 @@
 #include <vector>
 #include "AdaBoost.h"
 #include <climits>
+#include "BigVector.h"
+#include "BigVector.cpp"
 using namespace std;
 
 #define INF INT_MAX / 2
@@ -90,13 +92,13 @@ vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative
 
 	//potrebno je za svaku sliku na pocetku evaluirati svaki feature
 	//te zatim sortirati prema vrijednostima featura
-	vector < vector < triple > > featureValue;
-		
-	featureValue.reserve( features.size() );	
+	//vector < vector < triple > > featureValue( features.size() );
+	BigVector< vector<triple> > featureValue( features.size() );			
 
 	debug("EVALUIRAM FEATURE NA SLIKAMA" );
 	for(int i=0; i<features.size(); i++) {
-		vector<  triple > tmp;
+		vector<  triple > tmp;		
+		
 		tmp.reserve( positive.size() + brNegative );
 		bool broken = false;
 
@@ -121,6 +123,7 @@ vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative
 
 		validFeature.push_back( !broken );
 		featureValue.push_back( tmp );
+		
 		sort( featureValue.back().begin(), featureValue.back().end() );
 	}
 
