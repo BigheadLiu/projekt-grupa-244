@@ -10,8 +10,10 @@ BigVector<T>::BigVector(int koliko, int blocksize, int blockInMemory)
 
 	this->blocksize = blocksize;
 	this->blocksInMemory = blockInMemory;
+	this->kolikoUkupno = koliko;
 
 	int numblocks = (koliko + (1<<blocksize)-1) / (1<<blocksize);
+	blocksInMemory = min( blocksInMemory, numblocks ); //ne treba u memoriji drzat vise od maksimalnog broja blokova
 	gdje.resize( numblocks, 0 );
 	sto.resize( blocksInMemory, 0 );
 
@@ -35,13 +37,17 @@ BigVector<T>::BigVector(int koliko, int blocksize, int blockInMemory)
 template< typename T >
 BigVector<T>::~BigVector(void)
 {
-	cout << "Unistavam BigVector...";
-	for(int i=0; i<blocksInMemory; i++)
+	//cout << "Unistavam BigVector...";
+	for(int i=0; i<blocksInMemory; i++) {
+		//cout << "Brisem... " << i << " " << niz[i] << endl;
+		cout.flush();
 		delete[] niz[i];
+	}
+	//cout << "Brisem cijeli: " << endl; cout.flush();
 	delete[] niz;
 
 	fclose(f);
-	cout << "Gotovo" << endl;
+	//cout << "Gotovo" << endl;
 }
 
 template< typename T >
@@ -58,46 +64,58 @@ T& BigVector<T>::operator[] (int index) {
 	return niz[koji][ index & ( (1<<blocksize)-1)];
 }
 
-template< typename T >
-int BigVector<T>::loadBlock(int koji) {
-	//treba return na koje mjesto sam ga load-a
-	//stavi ga na prvo mjesto
+template< typename T > 
+int BigVector<T>::pickPlace() {
 	static int mjesto = 0;
+    int pos = mjesto;
+	mjesto = (mjesto + 1) % blocksInMemory; //makni se na sljedeci blok za mjesto load-anja
 
+	return pos;
+}
+
+template< typename T >  
+void BigVector<T>::load(int koji, int mjesto) {
+	fseek( f,koji * sizeof(T) * (1<<blocksize), SEEK_SET );
+	fread( (void *)niz[mjesto], sizeof(T), (1<<blocksize), f );
+}
+
+template< typename T >
+int BigVector<T>::loadBlock(int koji) {	
+	int mjesto = pickPlace();
 	writeBlock( mjesto, sto[mjesto] );	
 	gdje[koji] = mjesto;
 	sto[mjesto] = koji;
 
 	if (gdje[koji] != -2) {
-		fseek( f,koji * sizeof(T) * (1<<blocksize), SEEK_SET );
-		fread( (void *)niz[mjesto], sizeof(T), (1<<blocksize), f );
-	} else {//nije jos alociran
-		//mislim da nije potrebno.
-		//for(int i=0; i<(1<<blocksize); i++)
-		//	niz[mjesto][i].
-		//fill(niz[mjesto], niz[mjesto] + (1<<blocksize), T() );
-	}
-	int pos = mjesto;
-	mjesto = (mjesto + 1) % blocksInMemory; //makni se na sljedeci blok za mjesto load-anja
-	return pos;
+		load( koji, mjesto );
+	} 
+
+	return mjesto;
+}
+
+template< typename T >
+void BigVector<T>::write(int koji, int mjesto) {
+	fseek( f,koji * sizeof(T) * (1<< blocksize), SEEK_SET );
+	fwrite( (void *)niz[mjesto], sizeof(T), (1<<blocksize), f );
 }
 
 template< typename T >
 void BigVector<T>::writeBlock(int mjesto, int kojiBlok) {
 	gdje[ kojiBlok ] = -1;
-	fseek( f,kojiBlok * sizeof(T) * (1<< blocksize), SEEK_SET );
-	fwrite( (void *)niz[mjesto], sizeof(T), (1<<blocksize), f );
+	write( kojiBlok, mjesto );
 }
 
 
 template< typename T >
 T& BigVector<T>::back() {
+	assert( velicina > 0 );
 	return (*this)[velicina-1];
 }
 
 template< typename T >
-void BigVector<T>::push_back(T value) {
+void BigVector<T>::push_back(const T& value) {	
 	velicina++;
+	assert( velicina <= kolikoUkupno );
 	(*this)[velicina-1] = value;
 }
 

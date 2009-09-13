@@ -186,6 +186,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BigVectorVector.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Cascade.cpp"
 				>
 			</File>
@@ -249,6 +253,10 @@
 			</File>
 			<File
 				RelativePath=".\BigVector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BigVectorVector.h"
 				>
 			</File>
 			<File

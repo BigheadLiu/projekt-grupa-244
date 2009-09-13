@@ -371,7 +371,7 @@ vector<Image::Rectangle> Image::evaluateCascade(vector<Cascade>& kaskade, float 
 
 	int brFalse = 0, brTrue = 0;
 	for(;trenScale<zavrsniScale; trenScale *= stepScale) {	
-		int velicinaSkoka = ( trenScale + 1 ) * 5;
+		int velicinaSkoka = ( trenScale + 1 ) * 3; //ovdje je bilo 5
 		int velicinaProzora = trenScale * 24;
 
 		for(int i=0; i+velicinaProzora<getHeight(); i+= velicinaSkoka) {

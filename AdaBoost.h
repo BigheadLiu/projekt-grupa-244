@@ -27,6 +27,9 @@ private:
 		friend bool operator < (const triple &a, const triple &b) {
 			return a.value < b.value;
 		}
+		friend bool operator == (const triple &a, const triple &b) {
+			return a.value == b.value && a.index == b.index && a.positive == b.positive;
+		}
 		triple() { value = 0; index = 0; positive= 0; }
 	};
 

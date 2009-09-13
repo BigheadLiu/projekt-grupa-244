@@ -7,6 +7,8 @@
 #include "AdaBoost.h"
 #include <climits>
 #include "BigVector.h"
+#include "BigVectorVector.h"
+#include "BigVectorVector.cpp"
 #include "BigVector.cpp"
 using namespace std;
 
@@ -70,6 +72,15 @@ vector<Feature> AdaBoost::startTraining( vector<Image*>&positive, vector<Image*>
 	return train( positive, negative, najbolji, T ); // od najboljih featura po dijelovima, nadi najbolje ukupno
 }
 
+template< typename T >
+bool check(vector< T > &a, vector<T > &b) {
+	if (a.size() != b.size()) return false;
+	for(int i=0; i<a.size(); i++)
+		if ( !(a[i] == b[i]) ) return false;
+	return true;
+}
+
+
 vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative, vector< Feature > &features, int T) {
 	int brNegative = min( positive.size(), negative.size() );
 
@@ -92,8 +103,11 @@ vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative
 
 	//potrebno je za svaku sliku na pocetku evaluirati svaki feature
 	//te zatim sortirati prema vrijednostima featura
-	//vector < vector < triple > > featureValue( features.size() );
-	BigVector< vector<triple> > featureValue( features.size() );			
+	
+	//vector < vector < triple > > featureValue;
+	//featureValue.reserve( features.size() );
+
+	BigVectorVector< vector< triple > > featureValue( features.size(), positive.size() + brNegative, 7, 100  ); //ovo je 300MB u memoriji, blok velicine 3MB
 
 	debug("EVALUIRAM FEATURE NA SLIKAMA" );
 	for(int i=0; i<features.size(); i++) {
@@ -122,9 +136,12 @@ vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative
 		}
 
 		validFeature.push_back( !broken );
-		featureValue.push_back( tmp );
-		
-		sort( featureValue.back().begin(), featureValue.back().end() );
+		sort(tmp.begin(), tmp.end() );
+		featureValue.push_back( tmp );		
+
+		//featureValue2.push_back( tmp );
+		//if (check( featureValue.back(), featureValue2.back() ) == false)
+			//cout << "ERROR1" << endl;
 	}
 
 	debug("ZAPOCINJE ODABIR NAJBOLJIH FEATURA" );
@@ -147,7 +164,13 @@ vector<Feature> AdaBoost::train(vector<Image*>&positive, vector<Image*>&negative
 
 			for(int k=0; k<featureValue[j].size(); k++) {		
 				int index = featureValue[j][k].index;
-				int value = featureValue[j][k].value;				
+				int value = featureValue[j][k].value;		
+				
+				//if (index != featureValue2[j][k].index || value != featureValue2[j][k].value)
+				//	cout << "ERROR";
+				//if (featureValue[j][k].positive != featureValue2[j][k].positive)
+				//	cout << "ERROR";
+
 
 				float val1 = curr.first + (total.second - curr.second );
 				float val2 = curr.second + (total.first - curr.first);
