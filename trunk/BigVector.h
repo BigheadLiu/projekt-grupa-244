@@ -12,7 +12,7 @@ using namespace std;
 template< typename T> 
 class BigVector
 {
-private:
+protected:
 	vector< int > gdje;
 	vector< int > sto;
 	T** niz;
@@ -20,7 +20,8 @@ private:
 
 	int blocksize;
 	int numblocks, blocksInMemory;
-	int velicina;
+	int velicina; //koliko ih trenutno ima u vektoru
+	int kolikoUkupno; //maksimalan broj koliko ih moze biti
 public:
 	/*
 	* Konstruktor klase BigVector. 
@@ -36,10 +37,15 @@ public:
 
 	T& back();
 
-	void push_back(T value);
+	void push_back(const T& value);
 	T& operator[] (int index);
+
+	int pickPlace(); //odabire mjesto gdje ce biti spremljen sljedeci load-ani blok
 
 private:
 	int loadBlock(int index);
 	void writeBlock(int mjesto, int kojiBlok);
+
+	virtual void load(int koji, int mjesto); //bas cisto citanje iz file-a
+	virtual void write(int koji, int mjesto); //bas cisto pisanje u file
 };

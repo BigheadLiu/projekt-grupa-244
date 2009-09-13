@@ -37,8 +37,8 @@ void testirajKaskadu( Cascade &kaskada ) {
 
 void testViolaJones(int colorspace) {
 	DirectoryLoader loaderTrue("c:\\Images\\true", colorspace);
-	DirectoryLoader loaderFalse("c:\\Dokumenti\\Nastava - FER\\Projekt\\ProjektCV - kalafatic\\Images\\false", colorspace, true, 1000, true); //ucitava ih rekurzivno tako da ih je moguce stavit u vise direktorija
-	DirectoryLoader loaderFalse2("c:\\Dokumenti\\Nastava - FER\\Projekt\\ProjektCV - kalafatic\\Images\\false2", colorspace, true, 1000, true); //ucitava ih rekurzivno tako da ih je moguce stavit u vise direktorija
+	DirectoryLoader loaderFalse("c:\\Dokumenti\\Nastava - FER\\Projekt\\ProjektCV - ViolaJones\\Images\\false", colorspace, true, 1000, true); //ucitava ih rekurzivno tako da ih je moguce stavit u vise direktorija
+	DirectoryLoader loaderFalse2("c:\\Dokumenti\\Nastava - FER\\Projekt\\ProjektCV - ViolaJones\\Images\\false2", colorspace, true, 1000, true); //ucitava ih rekurzivno tako da ih je moguce stavit u vise direktorija
 	MultipleDirectoryLoader loaderFalseMultiple( loaderFalse, loaderFalse2 ); // ucitavanje slika iz vise direktorija
 
 	Feature::loadBaseFeatures("basefeatures.txt");
@@ -91,35 +91,40 @@ void testCommunicationWithGui() {
 	GuiCommunication::sendResults();
 }
 
-//#define REDIRECT
 
-int _tmain(int argc, _TCHAR* argv[])
-{	
+void test(void) {
 	//testCode::testColorSpace();
 	//testCode::testLoader(ColorSpace::GRAY);
 	//testCode::testMultipleLoader();
 	//testCode::testNegativeLoader();
-	//for(int i=0; i<10; i++)
-	//	testCode::testBigVector();
-	//return 0;
+	//for(int i=0; i<10; i++) {
+		//testCode::testBigVector();
+		//testCode::testBigVector2();
+	//}
+	//exit(0);
+}
 
-	//redirect output to file(for log files)
-#ifdef REDIRECT
+
+void redirectOutput() {
 	std::streambuf* cout_sbuf = std::cout.rdbuf(); // save original sbuf
 	ofstream fout("podaci.log");	
-    std::cout.rdbuf(fout.rdbuf()); // redirect 'cout' to a 'fout'    
-#endif
+    std::cout.rdbuf(fout.rdbuf()); // redirect 'cout' to a 'fout'  
+}
+int _tmain(int argc, _TCHAR* argv[])
+{	
+	//redirectOutput();
 
-	testViolaJones(ColorSpace::LAB);
+	//testViolaJones(ColorSpace::LAB);
 	//testViolaJonesLoadFromFile("KaskadaTest.cascade");
-	//testViolaJonesLoadFromFile("temp.cascade");
+	testViolaJonesLoadFromFile("c:\\Dokumenti\\Nastava - FER\\Projekt\\ProjektCV - ViolaJones\\Podaci - colorspace\\GRAY.cascade");
 	//testCommunicationWithGui();
 
-#ifdef REDIRECT
-	fout.close();
-#endif
 	return 0;
 }
+
+
+
+
 
 //TODO: ne postoji validation set za testiranje nego
 //		se to radi pomocu slika s kojima je izvodeno ucenje(tog levela kaskade)

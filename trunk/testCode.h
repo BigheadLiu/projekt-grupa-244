@@ -8,12 +8,71 @@
 #include <vector>
 #include <iostream>
 #include "BigVector.h"
+#include "BigVectorVector.h"
+#include "BigVectorVector.cpp"
+#include "BigVector.cpp"
 using namespace std;
 
 namespace testCode {
+	vector<int> createRandomVector(int);
+	void test(void) {
+		vector < int > v = createRandomVector(10);
+		vector< int > prazni;
+
+		cout << "Velicina vektora: " << sizeof(v) << ", a prazni: " << sizeof(prazni) << endl;
+		prazni.resize( v.size() );
+
+		FILE *f = fopen("test.dat", "w+b");
+			fwrite( &v[0], sizeof(int), v.size(), f);
+			fseek( f, 0, SEEK_SET );
+			fread( &prazni[0], sizeof(int), v.size(), f);
+
+		fclose(f);
+		cout << "v: \t\t";
+		for(int i=0; i<v.size(); i++)
+			cout << v[i] << " ";
+		cout << endl;
+
+		cout << "prazni: \t\t";
+		for(int i=0; i<prazni.size(); i++)
+			cout << prazni[i] << " ";
+		cout << endl;
+		system("pause");
+	}
+
+	vector< int > createRandomVector(int n) {
+		vector< int > rj;
+		for(int i=0; i<n; i++)
+			rj.push_back( rand() % 1000 );
+
+		return rj;
+	}
+
+	void testBigVector2(){
+		int broj = 100000;
+		int duljina = 3;
+		BigVectorVector< vector<int> > big(broj, duljina);
+		vector< vector<int> > normal;
+
+		for(int i=0; i<broj; i++) {
+			vector< int > v = createRandomVector( duljina );
+			big.push_back( v );
+			normal.push_back( v);
+			assert( big.back() == normal.back() );
+			sort( big.back().begin(), big.back().end() );
+			sort( normal.back().begin(), normal.back().end() );
+
+			assert( big.back() == normal.back() );
+		}
+
+		for(int i=0; i<broj; i++)
+			assert( big[i] == normal[i] );
+
+		cout << "GOTOV TEST2" << endl;
+	}
 
 	void testBigVector() {
-		int broj = 1000000;
+		int broj = 1000;
 		BigVector< int > big(broj);
 		vector< int > v;
 
