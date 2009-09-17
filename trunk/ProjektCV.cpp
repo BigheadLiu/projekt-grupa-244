@@ -110,13 +110,14 @@ void redirectOutput() {
 	ofstream fout("podaci.log");	
     std::cout.rdbuf(fout.rdbuf()); // redirect 'cout' to a 'fout'  
 }
+
 int _tmain(int argc, _TCHAR* argv[])
 {	
 	//redirectOutput();
 
 	//testViolaJones(ColorSpace::LAB);
 	//testViolaJonesLoadFromFile("KaskadaTest.cascade");
-	testViolaJonesLoadFromFile("c:\\Dokumenti\\Nastava - FER\\Projekt\\ProjektCV - ViolaJones\\Podaci - colorspace\\GRAY.cascade");
+	testViolaJonesLoadFromFile("c:\\Dokumenti\\Nastava - FER\\Projekt\\ProjektCV - ViolaJones\\Podaci - colorspace\\LAB - dobra.cascade");
 	//testCommunicationWithGui();
 
 	return 0;
